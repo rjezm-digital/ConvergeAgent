@@ -1,11 +1,12 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
 
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>Converge Agent CRM</title>
+<title>Converge CRM V5</title>
 
 <script src="https://cdn.tailwindcss.com"></script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -22,7 +23,7 @@ font-family:Arial;
 }
 
 .sidebar{
-width:240px;
+width:220px;
 background:#020617;
 border-right:1px solid #1e293b;
 }
@@ -30,9 +31,8 @@ border-right:1px solid #1e293b;
 .sidebar button{
 width:100%;
 padding:10px;
-display:flex;
-gap:10px;
 border-radius:8px;
+text-align:left;
 }
 
 .sidebar button:hover{
@@ -65,21 +65,19 @@ border-radius:8px;
 
 </head>
 
-
 <body class="flex h-screen">
 
 <!-- SIDEBAR -->
 
 <div class="sidebar p-4">
 
-<h2 class="text-lg font-semibold mb-6">
-Converge CRM
+<h2 class="text-lg font-bold mb-6">
+CRM V5
 </h2>
 
-<button onclick="scrollToSection('dashboard')">Dashboard</button>
-<button onclick="scrollToSection('fiberChecker')">Fiber Checker</button>
-<button onclick="scrollToSection('mapSection')">Customer Map</button>
-<button onclick="scrollToSection('tableSection')">Applications</button>
+<button onclick="scrollToSection('checker')">Fiber Checker</button>
+<button onclick="scrollToSection('mapSection')">Map</button>
+<button onclick="scrollToSection('applications')">Applications</button>
 
 </div>
 
@@ -88,14 +86,13 @@ Converge CRM
 
 <div class="flex-1 flex flex-col">
 
-<div class="flex justify-between items-center px-6 py-4 border-b border-slate-800 bg-slate-900">
+<div class="flex justify-between items-center px-6 py-4 bg-slate-900 border-b border-slate-800">
 
 <h1 class="text-xl font-semibold">
-Agent Sales Dashboard
+Converge Sales Dashboard
 </h1>
 
-<button id="btn-add"
-class="bg-blue-600 px-4 py-2 rounded">
+<button id="btnAdd" class="bg-blue-600 px-4 py-2 rounded">
 New Application
 </button>
 
@@ -104,17 +101,16 @@ New Application
 
 <div class="p-6 space-y-6 overflow-auto">
 
-<!-- STATS -->
-
-<div id="dashboard" class="grid grid-cols-4 gap-4"></div>
-
 <!-- FIBER CHECKER -->
 
-<div id="fiberChecker" class="card">
+<div id="checker" class="card">
 
-<h2 class="text-lg mb-3">Fiber Availability Checker</h2>
+<h2 class="text-lg mb-3">
+Fiber Availability Checker
+</h2>
 
-<input id="checkAddress"
+<input
+id="checkAddress"
 placeholder="Enter Address"
 class="w-full p-3 rounded bg-slate-900 mb-3"
 />
@@ -131,7 +127,7 @@ Check Availability
 
 <div id="mapSection" class="card">
 
-<h2 class="mb-3">Customer Locations</h2>
+<h2 class="mb-3">Location Map</h2>
 
 <div id="map"></div>
 
@@ -145,20 +141,24 @@ Check Availability
 
 </div>
 
-<!-- TABLE -->
+<!-- APPLICATION TABLE -->
 
-<div id="tableSection" class="card">
+<div id="applications" class="card">
+
+<h2 class="mb-3">Applications</h2>
 
 <table class="w-full text-sm">
 
 <thead>
+
 <tr>
 <th>Code</th>
-<th>Customer</th>
+<th>Name</th>
 <th>Phone</th>
 <th>Plan</th>
 <th>Status</th>
 </tr>
+
 </thead>
 
 <tbody id="table"></tbody>
@@ -170,7 +170,6 @@ Check Availability
 </div>
 
 </div>
-
 
 
 <!-- MODAL -->
@@ -210,16 +209,16 @@ Check Availability
 <option>FiberX Time-of-Day 1699</option>
 <option>FiberX Time-of-Day 3000</option>
 
-<option>FiberXtreme 4500 — 400 Mbps</option>
-<option>FiberXtreme 7000 — 800 Mbps</option>
+<option>FiberXtreme 4500</option>
+<option>FiberXtreme 7000</option>
 
-<option>MicroBiz 1500 — 300 Mbps</option>
-<option>MicroBiz 2500 — 700 Mbps</option>
-<option>MicroBiz 3500 — 1 Gbps</option>
+<option>MicroBiz 1500</option>
+<option>MicroBiz 2500</option>
+<option>MicroBiz 3500</option>
 
-<option>FlexiBiz 3000 — 500 Mbps</option>
-<option>FlexiBiz 5000 — 800 Mbps</option>
-<option>FlexiBiz 7000 — 1 Gbps</option>
+<option>FlexiBiz 3000</option>
+<option>FlexiBiz 5000</option>
+<option>FlexiBiz 7000</option>
 
 </select>
 
@@ -233,9 +232,11 @@ Check Availability
 
 </select>
 
-<button class="bg-blue-600 w-full p-3 rounded">Save</button>
+<button class="bg-blue-600 w-full p-3 rounded">
+Save
+</button>
 
-<button type="button" id="cancel" class="bg-slate-700 w-full p-3 rounded">
+<button type="button" onclick="closeModal()" class="bg-slate-700 w-full p-3 rounded">
 Cancel
 </button>
 
@@ -244,7 +245,6 @@ Cancel
 </div>
 
 </div>
-
 
 
 <script>
@@ -260,9 +260,7 @@ let chart
 const napLocations=[
 
 {name:"Tagbilaran NAP",lat:9.65,lng:123.85},
-
 {name:"Tubigon NAP",lat:9.95,lng:123.96},
-
 {name:"Panglao NAP",lat:9.58,lng:123.74}
 
 ]
@@ -278,7 +276,6 @@ L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map)
 function distance(lat1,lon1,lat2,lon2){
 
 const R=6371
-
 const dLat=(lat2-lat1)*Math.PI/180
 const dLon=(lon2-lon1)*Math.PI/180
 
@@ -296,14 +293,25 @@ return R*c*1000
 
 async function checkFiber(){
 
-let addr=$("checkAddress").value
+let addr=$("checkAddress").value.trim()
 
-let res=await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${addr}`)
+if(!addr){
+alert("Enter address")
+return
+}
 
+let url="https://nominatim.openstreetmap.org/search?format=json&q="+encodeURIComponent(addr)
+
+let res=await fetch(url)
 let data=await res.json()
 
-let lat=data[0].lat
-let lon=data[0].lon
+if(!data.length){
+alert("Address not found")
+return
+}
+
+let lat=parseFloat(data[0].lat)
+let lon=parseFloat(data[0].lon)
 
 if(marker) map.removeLayer(marker)
 
@@ -328,7 +336,6 @@ nearest=n
 let status="Not Available"
 
 if(min<300) status="Fiber Available"
-
 else if(min<700) status="Possible Extension"
 
 $("fiberResult").innerHTML=`
@@ -350,13 +357,11 @@ records.forEach(r=>{
 let tr=document.createElement("tr")
 
 tr.innerHTML=`
-
 <td>${r.code}</td>
 <td>${r.name}</td>
 <td>${r.phone}</td>
 <td>${r.plan}</td>
 <td>${r.status}</td>
-
 `
 
 $("table").appendChild(tr)
@@ -365,8 +370,15 @@ $("table").appendChild(tr)
 
 }
 
-$("btn-add").onclick=()=>{$("modal").classList.remove("hidden")}
-$("cancel").onclick=()=>{$("modal").classList.add("hidden")}
+function openModal(){
+$("modal").classList.remove("hidden")
+}
+
+function closeModal(){
+$("modal").classList.add("hidden")
+}
+
+$("btnAdd").onclick=openModal
 
 $("form").onsubmit=e=>{
 
@@ -385,7 +397,7 @@ status:$("status").value
 
 localStorage.setItem("crm",JSON.stringify(records))
 
-$("modal").classList.add("hidden")
+closeModal()
 
 renderTable()
 
