@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="en" class="h-full">
+<html lang="en">
 <head>
 
 <meta charset="UTF-8">
@@ -7,7 +7,7 @@
 
 <title>Converge Agent Dashboard</title>
 
-<script src="https://cdn.tailwindcss.com/3.4.17"></script>
+<script src="https://cdn.tailwindcss.com"></script>
 <script src="https://cdn.jsdelivr.net/npm/lucide@0.263.0/dist/umd/lucide.min.js"></script>
 
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Fraunces:wght@600;700&display=swap" rel="stylesheet">
@@ -16,7 +16,8 @@
 
 body{
 font-family:'DM Sans',sans-serif;
-margin:0;
+background:#0f172a;
+color:#f1f5f9;
 }
 
 .font-display{
@@ -30,16 +31,7 @@ font-size:12px;
 font-weight:600;
 }
 
-.card-hover{
-transition:.2s;
-}
-
-.card-hover:hover{
-transform:translateY(-2px);
-box-shadow:0 8px 24px rgba(0,0,0,.2);
-}
-
-.modal-backdrop{
+.modal{
 position:fixed;
 inset:0;
 background:rgba(0,0,0,.6);
@@ -52,24 +44,20 @@ justify-content:center;
 
 </head>
 
-
-<body class="h-full bg-slate-900 text-slate-100">
-
-
-<div id="app" class="h-full w-full overflow-auto">
+<body>
 
 
-<header class="flex items-center justify-between px-6 py-5 border-b border-slate-700 bg-slate-800">
+<header class="flex items-center justify-between px-6 py-4 bg-slate-800 border-b border-slate-700">
 
-<div class="flex items-center gap-3">
+<div class="flex items-center gap-4">
 
-<div class="w-10 h-10 rounded-xl flex items-center justify-center bg-blue-500">
-<i data-lucide="zap"></i>
-</div>
+<img
+src="https://upload.wikimedia.org/wikipedia/commons/9/9d/Converge_ICT_logo.svg"
+class="h-10">
 
 <div>
-<h1 class="font-display text-xl font-bold">Converge Agent Dashboard</h1>
-<p class="text-sm text-slate-400">Welcome back Agent</p>
+<h1 class="font-display text-xl">Agent Dashboard</h1>
+<p class="text-sm text-slate-400">Converge Sales Tracker</p>
 </div>
 
 </div>
@@ -78,12 +66,12 @@ justify-content:center;
 <div class="flex gap-3">
 
 <button id="btn-calendar"
-class="px-4 py-2 rounded-xl bg-slate-700 hover:bg-slate-600 text-sm">
-Calendar
+class="px-4 py-2 bg-slate-700 rounded-lg text-sm">
+Installation Calendar
 </button>
 
 <button id="btn-add"
-class="px-4 py-2 rounded-xl bg-blue-500 hover:bg-blue-600 text-sm flex gap-2 items-center">
+class="px-4 py-2 bg-blue-500 rounded-lg text-sm flex gap-2 items-center">
 <i data-lucide="plus"></i>
 New Application
 </button>
@@ -96,23 +84,24 @@ New Application
 
 <main class="p-6">
 
-<div id="stats-row" class="grid grid-cols-2 lg:grid-cols-6 gap-4 mb-6"></div>
+
+<div id="stats"
+class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6"></div>
 
 
 
-<div class="mb-5 flex gap-3">
+<div class="flex gap-3 mb-4">
 
-<input
-id="search-input"
+<input id="search"
 placeholder="Search customer..."
-class="px-4 py-2 rounded-xl bg-slate-800 border border-slate-700 flex-1">
+class="flex-1 px-4 py-2 bg-slate-800 border border-slate-700 rounded-lg">
 
-<select id="filter-status"
-class="px-4 py-2 rounded-xl bg-slate-800 border border-slate-700">
+<select id="filter"
+class="px-4 py-2 bg-slate-800 border border-slate-700 rounded-lg">
 
 <option value="all">All Status</option>
 <option>Application</option>
-<option>Survey</option>
+<option>OMD</option>
 <option>Approved</option>
 <option>Scheduled</option>
 <option>Installed</option>
@@ -123,7 +112,7 @@ class="px-4 py-2 rounded-xl bg-slate-800 border border-slate-700">
 
 
 
-<div class="rounded-xl overflow-hidden border border-slate-700">
+<div class="border border-slate-700 rounded-xl overflow-hidden">
 
 <table class="w-full text-sm">
 
@@ -134,7 +123,7 @@ class="px-4 py-2 rounded-xl bg-slate-800 border border-slate-700">
 <th class="px-4 py-3 text-left">Customer</th>
 <th class="px-4 py-3 text-left">Phone</th>
 <th class="px-4 py-3 text-left">Address</th>
-<th class="px-4 py-3 text-left">Product</th>
+<th class="px-4 py-3 text-left">Plan</th>
 <th class="px-4 py-3 text-left">Status</th>
 <th class="px-4 py-3 text-left">Actions</th>
 
@@ -142,7 +131,7 @@ class="px-4 py-2 rounded-xl bg-slate-800 border border-slate-700">
 
 </thead>
 
-<tbody id="table-body"></tbody>
+<tbody id="table"></tbody>
 
 </table>
 
@@ -152,49 +141,47 @@ class="px-4 py-2 rounded-xl bg-slate-800 border border-slate-700">
 
 
 
-<!-- MODAL -->
+<div id="modal" class="modal hidden">
 
-<div id="modal" class="modal-backdrop hidden">
+<div class="bg-slate-800 border border-slate-700 rounded-xl p-6 w-full max-w-lg">
 
-<div class="bg-slate-800 border border-slate-700 p-6 rounded-xl w-full max-w-lg">
+<h2 class="font-display text-lg mb-4">New Application</h2>
 
-<h2 class="font-display text-lg mb-4">Application</h2>
+<form id="form" class="space-y-3">
 
-<form id="app-form" class="space-y-4">
+<input id="name" placeholder="Customer Name"
+class="w-full px-4 py-2 bg-slate-900 border border-slate-700 rounded-lg">
 
+<input id="phone" placeholder="Phone Number"
+class="w-full px-4 py-2 bg-slate-900 border border-slate-700 rounded-lg">
 
-<input id="f-name"
-placeholder="Customer Name"
-required
-class="w-full px-4 py-2 rounded-xl bg-slate-900 border border-slate-700">
-
-
-<input id="f-phone"
-placeholder="Phone Number"
-required
-class="w-full px-4 py-2 rounded-xl bg-slate-900 border border-slate-700">
+<input id="address" placeholder="Address"
+class="w-full px-4 py-2 bg-slate-900 border border-slate-700 rounded-lg">
 
 
-<input id="f-address"
-placeholder="Address"
-required
-class="w-full px-4 py-2 rounded-xl bg-slate-900 border border-slate-700">
+<select id="plan"
+class="w-full px-4 py-2 bg-slate-900 border border-slate-700 rounded-lg">
 
-
-<select id="f-product"
-class="w-full px-4 py-2 rounded-xl bg-slate-900 border border-slate-700">
-
-<option>Fiber Internet</option>
-<option>Cable Internet</option>
+<option>Surf2Sawa 25 Mbps – ₱700</option>
+<option>FiberX 1500 – 200 Mbps – ₱1500</option>
+<option>FiberX 2000 – 400 Mbps – ₱2000</option>
+<option>FiberX 2500 – 600 Mbps – ₱2500</option>
+<option>FiberX 3500 – 800 Mbps – ₱3500</option>
+<option>FiberX 7000 – 1 Gbps – ₱7000</option>
+<option>FiberXtreme 3499 – Gaming</option>
+<option>FiberXtreme 3999 – Gaming</option>
+<option>FlexiBiz 3000 – SME</option>
+<option>FlexiBiz 5000 – SME</option>
+<option>FlexiBiz 7000 – SME</option>
 
 </select>
 
 
-<select id="f-status"
-class="w-full px-4 py-2 rounded-xl bg-slate-900 border border-slate-700">
+<select id="status"
+class="w-full px-4 py-2 bg-slate-900 border border-slate-700 rounded-lg">
 
 <option>Application</option>
-<option>Survey</option>
+<option>OMD</option>
 <option>Approved</option>
 <option>Scheduled</option>
 <option>Installed</option>
@@ -202,20 +189,27 @@ class="w-full px-4 py-2 rounded-xl bg-slate-900 border border-slate-700">
 </select>
 
 
-<label class="text-sm text-slate-400">Installation Date</label>
-<input type="date" id="f-install" class="w-full px-4 py-2 rounded-xl bg-slate-900 border border-slate-700">
+<label class="text-xs text-slate-400">Installation Date</label>
+<input type="date" id="install"
+class="w-full px-4 py-2 bg-slate-900 border border-slate-700 rounded-lg">
 
 
-<label class="text-sm text-slate-400">Follow Up Date</label>
-<input type="date" id="f-follow" class="w-full px-4 py-2 rounded-xl bg-slate-900 border border-slate-700">
+<label class="text-xs text-slate-400">Follow Up Date</label>
+<input type="date" id="follow"
+class="w-full px-4 py-2 bg-slate-900 border border-slate-700 rounded-lg">
 
 
 <div class="flex gap-3 pt-2">
 
-<button class="flex-1 py-2 rounded-xl bg-blue-500">Save</button>
+<button class="flex-1 py-2 bg-blue-500 rounded-lg">
+Save
+</button>
 
-<button type="button" id="btn-cancel"
-class="flex-1 py-2 rounded-xl bg-slate-700">Cancel</button>
+<button type="button"
+id="cancel"
+class="flex-1 py-2 bg-slate-700 rounded-lg">
+Cancel
+</button>
 
 </div>
 
@@ -233,42 +227,28 @@ const $ = id => document.getElementById(id)
 
 let records = []
 
-let editIndex = null
-
 const COMMISSION = 1500
 
 
 
 function renderStats(){
 
-const counts = {
-Application:0,
-Survey:0,
-Approved:0,
-Scheduled:0,
-Installed:0
-}
+let installed = records.filter(r=>r.status==="Installed").length
+let commission = installed * COMMISSION
 
-records.forEach(r=>{
-counts[r.status]++
-})
+$("stats").innerHTML = `
 
-const installs = counts.Installed
-const commission = installs * COMMISSION
-
-$("stats-row").innerHTML = `
-
-<div class="card-hover bg-slate-800 border border-slate-700 rounded-xl p-4">
-<p class="text-slate-400 text-xs">TOTAL</p>
+<div class="bg-slate-800 p-4 rounded-xl">
+<p class="text-slate-400 text-xs">TOTAL APPLICATIONS</p>
 <p class="text-2xl font-bold">${records.length}</p>
 </div>
 
-<div class="card-hover bg-slate-800 border border-slate-700 rounded-xl p-4">
+<div class="bg-slate-800 p-4 rounded-xl">
 <p class="text-slate-400 text-xs">INSTALLED</p>
-<p class="text-2xl font-bold">${installs}</p>
+<p class="text-2xl font-bold">${installed}</p>
 </div>
 
-<div class="card-hover bg-slate-800 border border-slate-700 rounded-xl p-4">
+<div class="bg-slate-800 p-4 rounded-xl">
 <p class="text-slate-400 text-xs">COMMISSION</p>
 <p class="text-2xl font-bold text-green-400">₱${commission}</p>
 </div>
@@ -281,43 +261,33 @@ $("stats-row").innerHTML = `
 
 function renderTable(){
 
-const tbody = $("table-body")
+let search = $("search").value.toLowerCase()
+let status = $("filter").value
 
-tbody.innerHTML=""
-
-const search = $("search-input").value.toLowerCase()
-
-const status = $("filter-status").value
+$("table").innerHTML=""
 
 records
 .filter(r=>{
 
-const matchSearch = r.name.toLowerCase().includes(search)
+let s = r.name.toLowerCase().includes(search)
+let st = status==="all" || r.status===status
 
-const matchStatus = status==="all"||r.status===status
-
-return matchSearch && matchStatus
+return s && st
 
 })
 .forEach((r,i)=>{
 
-const tr=document.createElement("tr")
+let tr=document.createElement("tr")
 
 tr.className="border-t border-slate-700"
 
 tr.innerHTML=`
 
 <td class="px-4 py-3">${r.name}</td>
-
 <td class="px-4 py-3">${r.phone}</td>
-
 <td class="px-4 py-3">${r.address}</td>
-
-<td class="px-4 py-3">${r.product}</td>
-
-<td class="px-4 py-3">
-<span class="status-pill bg-slate-700">${r.status}</span>
-</td>
+<td class="px-4 py-3">${r.plan}</td>
+<td class="px-4 py-3">${r.status}</td>
 
 <td class="px-4 py-3 flex gap-2">
 
@@ -325,14 +295,15 @@ tr.innerHTML=`
 <i data-lucide="arrow-right"></i>
 </button>
 
-<button onclick="removeRec(${i})">
+<button onclick="delRec(${i})">
 <i data-lucide="trash"></i>
 </button>
 
 </td>
+
 `
 
-tbody.appendChild(tr)
+$("table").appendChild(tr)
 
 })
 
@@ -344,12 +315,18 @@ lucide.createIcons()
 
 function advance(i){
 
-const order=["Application","Survey","Approved","Scheduled","Installed"]
+const order=[
+"Application",
+"OMD",
+"Approved",
+"Scheduled",
+"Installed"
+]
 
-let idx = order.indexOf(records[i].status)
+let idx=order.indexOf(records[i].status)
 
 if(idx<order.length-1)
-records[i].status = order[idx+1]
+records[i].status=order[idx+1]
 
 renderStats()
 renderTable()
@@ -358,7 +335,7 @@ renderTable()
 
 
 
-function removeRec(i){
+function delRec(i){
 
 records.splice(i,1)
 
@@ -370,38 +347,32 @@ renderTable()
 
 
 $("btn-add").onclick=()=>{
-
 $("modal").classList.remove("hidden")
-
 }
 
 
 
-$("btn-cancel").onclick=()=>{
-
+$("cancel").onclick=()=>{
 $("modal").classList.add("hidden")
-
 }
 
 
 
-$("app-form").onsubmit=(e)=>{
+$("form").onsubmit=e=>{
 
 e.preventDefault()
 
-const data={
+records.push({
 
-name:$("f-name").value,
-phone:$("f-phone").value,
-address:$("f-address").value,
-product:$("f-product").value,
-status:$("f-status").value,
-install:$("f-install").value,
-follow:$("f-follow").value
+name:$("name").value,
+phone:$("phone").value,
+address:$("address").value,
+plan:$("plan").value,
+status:$("status").value,
+install:$("install").value,
+follow:$("follow").value
 
-}
-
-records.push(data)
+})
 
 $("modal").classList.add("hidden")
 
@@ -414,15 +385,15 @@ renderTable()
 
 $("btn-calendar").onclick=()=>{
 
-const installs = records.filter(r=>r.install)
+let installs=records.filter(r=>r.install)
 
-let msg="Install Schedule\n\n"
+let txt="Install Schedule\n\n"
 
 installs.forEach(r=>{
-msg+=`${r.install} - ${r.name}\n`
+txt+=`${r.install} - ${r.name}\n`
 })
 
-alert(msg)
+alert(txt)
 
 }
 
@@ -430,9 +401,9 @@ alert(msg)
 
 function checkFollowups(){
 
-const today=new Date().toISOString().split("T")[0]
+let today=new Date().toISOString().split("T")[0]
 
-const due=records.filter(r=>r.follow===today)
+let due=records.filter(r=>r.follow===today)
 
 if(due.length)
 alert(`${due.length} follow ups today`)
@@ -443,8 +414,8 @@ setTimeout(checkFollowups,2000)
 
 
 
-$("search-input").oninput=renderTable
-$("filter-status").onchange=renderTable
+$("search").oninput=renderTable
+$("filter").onchange=renderTable
 
 
 
@@ -454,7 +425,6 @@ renderTable()
 lucide.createIcons()
 
 </script>
-
 
 </body>
 </html>
