@@ -1,5 +1,6 @@
 <!doctype html>
 <html lang="en">
+
 <head>
 
 <meta charset="UTF-8">
@@ -10,7 +11,7 @@
 <script src="https://cdn.tailwindcss.com"></script>
 <script src="https://cdn.jsdelivr.net/npm/lucide@0.263.0/dist/umd/lucide.min.js"></script>
 
-<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Fraunces:wght@600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;600;700&family=Fraunces:wght@600;700&display=swap" rel="stylesheet">
 
 <style>
 
@@ -22,13 +23,6 @@ color:#f1f5f9;
 
 .font-display{
 font-family:'Fraunces',serif;
-}
-
-.status-pill{
-padding:4px 12px;
-border-radius:999px;
-font-size:12px;
-font-weight:600;
 }
 
 .modal{
@@ -44,20 +38,20 @@ justify-content:center;
 
 </head>
 
+
 <body>
+
 
 
 <header class="flex items-center justify-between px-6 py-4 bg-slate-800 border-b border-slate-700">
 
 <div class="flex items-center gap-4">
 
-<img
-src="https://upload.wikimedia.org/wikipedia/commons/9/9d/Converge_ICT_logo.svg"
-class="h-10">
+<img src="https://upload.wikimedia.org/wikipedia/commons/9/9d/Converge_ICT_logo.svg" class="h-10">
 
 <div>
 <h1 class="font-display text-xl">Agent Dashboard</h1>
-<p class="text-sm text-slate-400">Converge Sales Tracker</p>
+<p class="text-sm text-slate-400">Converge Sales CRM</p>
 </div>
 
 </div>
@@ -85,9 +79,20 @@ New Application
 <main class="p-6">
 
 
-<div id="stats"
-class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6"></div>
+<!-- STATS -->
 
+<div id="stats" class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6"></div>
+
+
+<!-- PLAN ANALYTICS -->
+
+<div class="bg-slate-800 border border-slate-700 rounded-xl p-4 mb-6">
+
+<h3 class="font-display mb-3">Plan Sales Analytics</h3>
+
+<div id="planStats" class="grid grid-cols-2 md:grid-cols-4 gap-3"></div>
+
+</div>
 
 
 <div class="flex gap-3 mb-4">
@@ -112,7 +117,7 @@ class="px-4 py-2 bg-slate-800 border border-slate-700 rounded-lg">
 
 
 
-<div class="border border-slate-700 rounded-xl overflow-hidden">
+<div class="border border-slate-700 rounded-xl overflow-x-auto">
 
 <table class="w-full text-sm">
 
@@ -120,11 +125,12 @@ class="px-4 py-2 bg-slate-800 border border-slate-700 rounded-lg">
 
 <tr>
 
+<th class="px-4 py-3 text-left">Code</th>
 <th class="px-4 py-3 text-left">Customer</th>
 <th class="px-4 py-3 text-left">Phone</th>
-<th class="px-4 py-3 text-left">Address</th>
 <th class="px-4 py-3 text-left">Plan</th>
 <th class="px-4 py-3 text-left">Status</th>
+<th class="px-4 py-3 text-left">Commission</th>
 <th class="px-4 py-3 text-left">Actions</th>
 
 </tr>
@@ -141,6 +147,8 @@ class="px-4 py-2 bg-slate-800 border border-slate-700 rounded-lg">
 
 
 
+<!-- MODAL -->
+
 <div id="modal" class="modal hidden">
 
 <div class="bg-slate-800 border border-slate-700 rounded-xl p-6 w-full max-w-lg">
@@ -149,30 +157,41 @@ class="px-4 py-2 bg-slate-800 border border-slate-700 rounded-lg">
 
 <form id="form" class="space-y-3">
 
-<input id="name" placeholder="Customer Name"
+<input id="code"
+placeholder="Application Code"
 class="w-full px-4 py-2 bg-slate-900 border border-slate-700 rounded-lg">
 
-<input id="phone" placeholder="Phone Number"
+<input id="name"
+placeholder="Customer Name"
 class="w-full px-4 py-2 bg-slate-900 border border-slate-700 rounded-lg">
 
-<input id="address" placeholder="Address"
+<input id="phone"
+placeholder="Phone Number"
+class="w-full px-4 py-2 bg-slate-900 border border-slate-700 rounded-lg">
+
+<input id="address"
+placeholder="Address"
 class="w-full px-4 py-2 bg-slate-900 border border-slate-700 rounded-lg">
 
 
 <select id="plan"
 class="w-full px-4 py-2 bg-slate-900 border border-slate-700 rounded-lg">
 
-<option>Surf2Sawa 25 Mbps – ₱700</option>
-<option>FiberX 1500 – 200 Mbps – ₱1500</option>
-<option>FiberX 2000 – 400 Mbps – ₱2000</option>
-<option>FiberX 2500 – 600 Mbps – ₱2500</option>
-<option>FiberX 3500 – 800 Mbps – ₱3500</option>
-<option>FiberX 7000 – 1 Gbps – ₱7000</option>
-<option>FiberXtreme 3499 – Gaming</option>
-<option>FiberXtreme 3999 – Gaming</option>
-<option>FlexiBiz 3000 – SME</option>
-<option>FlexiBiz 5000 – SME</option>
-<option>FlexiBiz 7000 – SME</option>
+<option>FiberX 1500 — 300 Mbps — ₱1500</option>
+<option>FiberX 2000 — 500 Mbps — ₱2000</option>
+<option>FiberX 2500 — 700 Mbps — ₱2500</option>
+<option>FiberX 3500 — 1 Gbps — ₱3500</option>
+
+<option>Super FiberX 1349 — 200 Mbps — ₱1349</option>
+<option>Super FiberX 1599 — 400 Mbps — ₱1599</option>
+
+<option>GameChanger EZ — 400 Mbps — ₱1800</option>
+
+<option>FiberX Time-of-Day 1699 — 400 Mbps Day / 600 Mbps Night — ₱1699</option>
+<option>FiberX Time-of-Day 3000 — 800 Mbps Day / 600 Mbps Night — ₱3000</option>
+
+<option>FiberXtreme 4500 — 400 Mbps — ₱4500</option>
+<option>FiberXtreme 7000 — 800 Mbps — ₱7000</option>
 
 </select>
 
@@ -225,21 +244,34 @@ Cancel
 
 const $ = id => document.getElementById(id)
 
-let records = []
+let records=[]
 
-const COMMISSION = 1500
+
+function getCommission(plan){
+
+const price=parseInt(plan.match(/₱(\d+)/)[1])
+
+if(price<=1500) return 800
+if(price<=2500) return 1200
+if(price>=3000) return 2000
+
+return 1000
+}
 
 
 
 function renderStats(){
 
-let installed = records.filter(r=>r.status==="Installed").length
-let commission = installed * COMMISSION
+let installed=records.filter(r=>r.status==="Installed").length
 
-$("stats").innerHTML = `
+let commission=records
+.filter(r=>r.status==="Installed")
+.reduce((sum,r)=>sum+getCommission(r.plan),0)
+
+$("stats").innerHTML=`
 
 <div class="bg-slate-800 p-4 rounded-xl">
-<p class="text-slate-400 text-xs">TOTAL APPLICATIONS</p>
+<p class="text-slate-400 text-xs">TOTAL</p>
 <p class="text-2xl font-bold">${records.length}</p>
 </div>
 
@@ -259,23 +291,53 @@ $("stats").innerHTML = `
 
 
 
+function renderPlanStats(){
+
+let stats={}
+
+records.forEach(r=>{
+stats[r.plan]=(stats[r.plan]||0)+1
+})
+
+$("planStats").innerHTML=""
+
+Object.entries(stats).forEach(([plan,count])=>{
+
+let div=document.createElement("div")
+
+div.className="bg-slate-900 p-3 rounded-lg text-sm"
+
+div.innerHTML=`
+<p class="text-slate-400">${plan}</p>
+<p class="text-lg font-bold">${count}</p>
+`
+
+$("planStats").appendChild(div)
+
+})
+
+}
+
+
+
 function renderTable(){
 
-let search = $("search").value.toLowerCase()
-let status = $("filter").value
+let search=$("search").value.toLowerCase()
+let status=$("filter").value
 
 $("table").innerHTML=""
 
-records
-.filter(r=>{
+records.filter(r=>{
 
-let s = r.name.toLowerCase().includes(search)
-let st = status==="all" || r.status===status
+let s=r.name.toLowerCase().includes(search)
+let st=status==="all"||r.status===status
 
-return s && st
+return s&&st
 
 })
 .forEach((r,i)=>{
+
+let commission=getCommission(r.plan)
 
 let tr=document.createElement("tr")
 
@@ -283,11 +345,12 @@ tr.className="border-t border-slate-700"
 
 tr.innerHTML=`
 
+<td class="px-4 py-3">${r.code}</td>
 <td class="px-4 py-3">${r.name}</td>
 <td class="px-4 py-3">${r.phone}</td>
-<td class="px-4 py-3">${r.address}</td>
 <td class="px-4 py-3">${r.plan}</td>
 <td class="px-4 py-3">${r.status}</td>
+<td class="px-4 py-3 text-green-400">₱${commission}</td>
 
 <td class="px-4 py-3 flex gap-2">
 
@@ -315,13 +378,7 @@ lucide.createIcons()
 
 function advance(i){
 
-const order=[
-"Application",
-"OMD",
-"Approved",
-"Scheduled",
-"Installed"
-]
+const order=["Application","OMD","Approved","Scheduled","Installed"]
 
 let idx=order.indexOf(records[i].status)
 
@@ -330,6 +387,7 @@ records[i].status=order[idx+1]
 
 renderStats()
 renderTable()
+renderPlanStats()
 
 }
 
@@ -341,19 +399,24 @@ records.splice(i,1)
 
 renderStats()
 renderTable()
+renderPlanStats()
 
 }
 
 
 
 $("btn-add").onclick=()=>{
+
 $("modal").classList.remove("hidden")
+
 }
 
 
 
 $("cancel").onclick=()=>{
+
 $("modal").classList.add("hidden")
+
 }
 
 
@@ -364,6 +427,7 @@ e.preventDefault()
 
 records.push({
 
+code:$("code").value,
 name:$("name").value,
 phone:$("phone").value,
 address:$("address").value,
@@ -378,6 +442,7 @@ $("modal").classList.add("hidden")
 
 renderStats()
 renderTable()
+renderPlanStats()
 
 }
 
@@ -399,21 +464,6 @@ alert(txt)
 
 
 
-function checkFollowups(){
-
-let today=new Date().toISOString().split("T")[0]
-
-let due=records.filter(r=>r.follow===today)
-
-if(due.length)
-alert(`${due.length} follow ups today`)
-
-}
-
-setTimeout(checkFollowups,2000)
-
-
-
 $("search").oninput=renderTable
 $("filter").onchange=renderTable
 
@@ -421,6 +471,7 @@ $("filter").onchange=renderTable
 
 renderStats()
 renderTable()
+renderPlanStats()
 
 lucide.createIcons()
 
