@@ -14,6 +14,8 @@ margin:0;
 background:#f4f6fb;
 }
 
+/* LOGIN */
+
 .login{
 width:320px;
 margin:120px auto;
@@ -31,6 +33,8 @@ border-radius:6px;
 border:1px solid #ddd;
 }
 
+/* BUTTON */
+
 button{
 padding:8px 12px;
 background:#4a6cf7;
@@ -39,6 +43,8 @@ border:none;
 border-radius:6px;
 cursor:pointer;
 }
+
+/* DASHBOARD */
 
 .dashboard{
 display:none;
@@ -68,6 +74,8 @@ padding:30px;
 display:none;
 }
 
+/* CARDS */
+
 .cards{
 display:flex;
 gap:20px;
@@ -86,6 +94,8 @@ border-radius:10px;
 .c3{background:#42e695;}
 .c4{background:#ff9966;}
 
+/* FORM */
+
 input,select{
 width:100%;
 padding:10px;
@@ -93,6 +103,8 @@ margin:6px 0;
 border-radius:6px;
 border:1px solid #ddd;
 }
+
+/* TABLE */
 
 table{
 width:100%;
@@ -109,8 +121,10 @@ border-bottom:1px solid #eee;
 background:red;
 }
 
+/* MAP */
+
 #map{
-height:500px;
+height:450px;
 }
 
 </style>
@@ -118,6 +132,8 @@ height:500px;
 </head>
 
 <body>
+
+<!-- LOGIN -->
 
 <div class="login" id="login">
 
@@ -129,6 +145,8 @@ height:500px;
 <button onclick="login()">Login</button>
 
 </div>
+
+<!-- DASHBOARD -->
 
 <div class="dashboard" id="dashboard">
 
@@ -143,6 +161,8 @@ height:500px;
 </div>
 
 <div class="main">
+
+<!-- DASHBOARD -->
 
 <div id="dash" class="section">
 
@@ -159,6 +179,8 @@ height:500px;
 
 </div>
 
+<!-- SUBSCRIBERS -->
+
 <div id="subs" class="section">
 
 <h2>Add Subscriber</h2>
@@ -168,35 +190,41 @@ height:500px;
 <input id="code" placeholder="Application Code">
 <input id="address" placeholder="Address">
 
-<input id="lat" placeholder="Latitude">
-<input id="lng" placeholder="Longitude">
+<input id="lat" placeholder="Latitude (optional)">
+<input id="lng" placeholder="Longitude (optional)">
 
 <select id="plan">
 
+<!-- SUPER FIBER -->
 <option value="1349">Super FiberX Play 1349</option>
 <option value="1599">Super FiberX Max 1599</option>
 <option value="2599">Super FiberX Ultra 2599</option>
 
+<!-- FIBERX -->
 <option value="1500">FiberX 1500</option>
 <option value="2000">FiberX 2000</option>
 <option value="2500">FiberX 2500</option>
 <option value="3500">FiberX 3500</option>
 <option value="7000">FiberX 7000</option>
 
+<!-- BUNDLES -->
 <option value="1700">FiberX 1500 + Vision</option>
 <option value="2200">FiberX 2000 + Vision</option>
 <option value="2700">FiberX 2500 + Vision</option>
 
+<!-- TOD -->
 <option value="1699">TOD 1699</option>
 <option value="1999">TOD 1999</option>
 <option value="3000">TOD 3000</option>
 <option value="3500">TOD 3500</option>
 
+<!-- FLEXIBIZ -->
 <option value="1500">FlexiBIZ 1500</option>
 <option value="2000">FlexiBIZ 2000</option>
 <option value="3000">FlexiBIZ 3000</option>
 <option value="5000">FlexiBIZ 5000</option>
 
+<!-- MICROBIZ -->
 <option value="1449">MicroBIZ MAX 1449</option>
 <option value="1549">MicroBIZ MAX 1549</option>
 <option value="1749">MicroBIZ MAX 1749</option>
@@ -216,6 +244,7 @@ height:500px;
 <table>
 
 <thead>
+
 <tr>
 <th>Name</th>
 <th>Phone</th>
@@ -225,6 +254,7 @@ height:500px;
 <th>Next</th>
 <th>Delete</th>
 </tr>
+
 </thead>
 
 <tbody id="table"></tbody>
@@ -232,6 +262,8 @@ height:500px;
 </table>
 
 </div>
+
+<!-- MAP -->
 
 <div id="mapsec" class="section">
 
@@ -244,8 +276,6 @@ height:500px;
 </div>
 
 </div>
-
-<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
 <script>
 
@@ -260,6 +290,9 @@ let stages=[
 ]
 
 let map
+let markers=[]
+
+/* LOGIN */
 
 function login(){
 
@@ -272,15 +305,16 @@ document.getElementById("login").style.display="none"
 document.getElementById("dashboard").style.display="block"
 
 showSection("dash")
-initMap()
 
 }else{
 
-alert("Wrong username or password")
+alert("Wrong login")
 
 }
 
 }
+
+/* SECTIONS */
 
 function showSection(id){
 
@@ -290,35 +324,63 @@ s.style.display="none"
 
 document.getElementById(id).style.display="block"
 
+if(id==="mapsec" && !map){
+
+loadMap()
+
 }
 
-function initMap(){
+}
+
+/* FAST MAP LOAD */
+
+function loadMap(){
+
+let script=document.createElement("script")
+script.src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+
+script.onload=function(){
 
 map=L.map('map').setView([9.65,124.02],11)
 
-L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png',{
+L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{
 maxZoom:19
 }).addTo(map)
 
+render()
+
 }
+
+document.body.appendChild(script)
+
+}
+
+/* ADD SUBSCRIBER */
 
 function add(){
 
+let name=document.getElementById("name").value
+let phone=document.getElementById("phone").value
+let code=document.getElementById("code").value
+let plan=document.getElementById("plan").value
+let lat=document.getElementById("lat").value
+let lng=document.getElementById("lng").value
+
 subscribers.push({
-
-name:name.value,
-phone:phone.value,
-code:code.value,
-plan:plan.value,
-lat:lat.value,
-lng:lng.value,
+name:name,
+phone:phone,
+code:code,
+plan:plan,
+lat:lat,
+lng:lng,
 status:0
-
 })
 
 render()
 
 }
+
+/* NEXT STEP */
 
 function nextStep(i){
 
@@ -332,6 +394,8 @@ render()
 
 }
 
+/* DELETE */
+
 function deleteRow(i){
 
 subscribers.splice(i,1)
@@ -340,23 +404,22 @@ render()
 
 }
 
+/* RENDER */
+
 function render(){
 
 let table=document.getElementById("table")
 
 table.innerHTML=""
 
-let searchText=search.value.toLowerCase()
+let searchText=document.getElementById("search").value.toLowerCase()
 
 let pendingCount=0
 let installedCount=0
 let totalCommission=0
 
-if(map){
-map.eachLayer(layer=>{
-if(layer instanceof L.Marker) map.removeLayer(layer)
-})
-}
+markers.forEach(m=>map && map.removeLayer(m))
+markers=[]
 
 subscribers.forEach((s,i)=>{
 
@@ -371,14 +434,10 @@ let stage=stages[s.status]
 let commission=(s.plan/2)-50
 
 if(stage==="Installed"){
-
 installedCount++
 totalCommission+=commission
-
 }else{
-
 pendingCount++
-
 }
 
 table.innerHTML+=`
@@ -396,9 +455,11 @@ table.innerHTML+=`
 
 if(map && s.lat && s.lng){
 
-L.marker([s.lat,s.lng])
-.addTo(map)
-.bindPopup(s.name+"<br>"+s.phone)
+let marker=L.marker([s.lat,s.lng]).addTo(map)
+
+marker.bindPopup(s.name)
+
+markers.push(marker)
 
 }
 
@@ -406,12 +467,14 @@ L.marker([s.lat,s.lng])
 
 })
 
-total.innerText=subscribers.length
-pending.innerText=pendingCount
-installed.innerText=installedCount
-commission.innerText=totalCommission
+document.getElementById("total").innerText=subscribers.length
+document.getElementById("pending").innerText=pendingCount
+document.getElementById("installed").innerText=installedCount
+document.getElementById("commission").innerText=totalCommission
 
 }
+
+/* EXPORT */
 
 function exportCSV(){
 
