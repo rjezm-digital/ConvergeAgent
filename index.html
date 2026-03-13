@@ -5,23 +5,20 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>Converge Agent CRM PRO</title>
+<title>Converge Agent CRM</title>
 
 <script src="https://cdn.tailwindcss.com"></script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/lucide@0.263.0/dist/umd/lucide.min.js"></script>
 
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-
 <style>
 
 body{
-font-family:Inter,sans-serif;
 background:#0f172a;
-color:#e2e8f0;
+color:white;
+font-family:Arial;
 }
 
 .sidebar{
@@ -32,9 +29,9 @@ border-right:1px solid #1e293b;
 
 .sidebar button{
 width:100%;
+padding:10px;
 display:flex;
 gap:10px;
-padding:10px;
 border-radius:8px;
 }
 
@@ -59,8 +56,9 @@ justify-content:center;
 z-index:9999;
 }
 
-.leaflet-container{
-z-index:1;
+#map{
+height:320px;
+border-radius:8px;
 }
 
 </style>
@@ -75,32 +73,13 @@ z-index:1;
 <div class="sidebar p-4">
 
 <h2 class="text-lg font-semibold mb-6">
-Agent CRM PRO
+Converge CRM
 </h2>
 
-<div class="space-y-2">
-
-<button onclick="scrollToSection('dashboard')">
-<i data-lucide="layout-dashboard"></i>
-Dashboard
-</button>
-
-<button onclick="scrollToSection('mapSection')">
-<i data-lucide="map"></i>
-Map
-</button>
-
-<button onclick="scrollToSection('analytics')">
-<i data-lucide="bar-chart"></i>
-Sales Charts
-</button>
-
-<button onclick="scrollToSection('tableSection')">
-<i data-lucide="users"></i>
-Applications
-</button>
-
-</div>
+<button onclick="scrollToSection('dashboard')">Dashboard</button>
+<button onclick="scrollToSection('fiberChecker')">Fiber Checker</button>
+<button onclick="scrollToSection('mapSection')">Customer Map</button>
+<button onclick="scrollToSection('tableSection')">Applications</button>
 
 </div>
 
@@ -109,77 +88,77 @@ Applications
 
 <div class="flex-1 flex flex-col">
 
-<!-- HEADER -->
-
 <div class="flex justify-between items-center px-6 py-4 border-b border-slate-800 bg-slate-900">
 
 <h1 class="text-xl font-semibold">
-Converge Sales Dashboard
+Agent Sales Dashboard
 </h1>
 
-<div class="flex gap-3">
-
 <button id="btn-add"
-class="bg-blue-600 px-4 py-2 rounded-lg flex items-center gap-2">
-<i data-lucide="plus"></i>
+class="bg-blue-600 px-4 py-2 rounded">
 New Application
 </button>
 
-<button id="btn-export"
-class="bg-slate-700 px-4 py-2 rounded-lg">
-Export
-</button>
-
-<label class="bg-slate-700 px-4 py-2 rounded-lg cursor-pointer">
-Import
-<input type="file" id="importFile" hidden>
-</label>
-
 </div>
 
-</div>
-
-
-<!-- CONTENT -->
 
 <div class="p-6 space-y-6 overflow-auto">
 
+<!-- STATS -->
+
 <div id="dashboard" class="grid grid-cols-4 gap-4"></div>
 
-<div id="mapSection" class="card">
+<!-- FIBER CHECKER -->
 
-<h2 class="font-semibold mb-3">Customer Locations</h2>
+<div id="fiberChecker" class="card">
 
-<div id="map" style="height:300px;border-radius:8px;"></div>
+<h2 class="text-lg mb-3">Fiber Availability Checker</h2>
+
+<input id="checkAddress"
+placeholder="Enter Address"
+class="w-full p-3 rounded bg-slate-900 mb-3"
+/>
+
+<button onclick="checkFiber()" class="bg-blue-600 px-4 py-2 rounded">
+Check Availability
+</button>
+
+<div id="fiberResult" class="mt-4"></div>
 
 </div>
 
-<div id="analytics" class="card">
+<!-- MAP -->
 
-<h2 class="font-semibold mb-3">Plan Sales Chart</h2>
+<div id="mapSection" class="card">
+
+<h2 class="mb-3">Customer Locations</h2>
+
+<div id="map"></div>
+
+</div>
+
+<!-- SALES CHART -->
+
+<div class="card">
 
 <canvas id="salesChart"></canvas>
 
 </div>
 
-<div id="tableSection" class="card">
+<!-- TABLE -->
 
-<h2 class="font-semibold mb-4">Applications</h2>
+<div id="tableSection" class="card">
 
 <table class="w-full text-sm">
 
-<thead class="text-slate-400 border-b border-slate-800">
-
+<thead>
 <tr>
-<th class="text-left py-2">Code</th>
+<th>Code</th>
 <th>Customer</th>
 <th>Phone</th>
 <th>Plan</th>
 <th>Status</th>
-<th>Commission</th>
-<th></th>
 </tr>
-
 </thead>
 
 <tbody id="table"></tbody>
@@ -190,14 +169,8 @@ Import
 
 </div>
 
-<footer class="text-center text-xs text-slate-500 py-4 border-t border-slate-800">
-
-© 2026 Converge Agent CRM PRO  
-By Randy Tadlas
-
-</footer>
-
 </div>
+
 
 
 <!-- MODAL -->
@@ -206,19 +179,19 @@ By Randy Tadlas
 
 <div class="card w-full max-w-md">
 
-<h2 class="font-semibold mb-3">New Application</h2>
+<h2 class="mb-3">New Application</h2>
 
 <form id="form" class="space-y-3">
 
-<input id="code" placeholder="Code" class="w-full p-3 rounded bg-slate-900">
+<input id="code" placeholder="Code" class="w-full p-3 bg-slate-900 rounded">
 
-<input id="name" placeholder="Customer Name" class="w-full p-3 rounded bg-slate-900">
+<input id="name" placeholder="Customer Name" class="w-full p-3 bg-slate-900 rounded">
 
-<input id="phone" placeholder="Phone" class="w-full p-3 rounded bg-slate-900">
+<input id="phone" placeholder="Phone" class="w-full p-3 bg-slate-900 rounded">
 
-<input id="address" placeholder="Address" class="w-full p-3 rounded bg-slate-900">
+<input id="address" placeholder="Address" class="w-full p-3 bg-slate-900 rounded">
 
-<select id="plan" class="w-full p-3 rounded bg-slate-900">
+<select id="plan" class="w-full p-3 bg-slate-900 rounded">
 
 <option>Surf2Sawa 25 Mbps — ₱700</option>
 
@@ -234,23 +207,23 @@ By Randy Tadlas
 <option>GameChanger EZ — 400 Mbps — ₱1800</option>
 <option>GameChanger Pro — 700 Mbps — ₱2500</option>
 
-<option>FiberX Time-of-Day 1699 — ₱1699</option>
-<option>FiberX Time-of-Day 3000 — ₱3000</option>
+<option>FiberX Time-of-Day 1699</option>
+<option>FiberX Time-of-Day 3000</option>
 
-<option>FiberXtreme 4500 — 400 Mbps — ₱4500</option>
-<option>FiberXtreme 7000 — 800 Mbps — ₱7000</option>
+<option>FiberXtreme 4500 — 400 Mbps</option>
+<option>FiberXtreme 7000 — 800 Mbps</option>
 
-<option>MicroBiz 1500 — 300 Mbps — ₱1500</option>
-<option>MicroBiz 2500 — 700 Mbps — ₱2500</option>
-<option>MicroBiz 3500 — 1 Gbps — ₱3500</option>
+<option>MicroBiz 1500 — 300 Mbps</option>
+<option>MicroBiz 2500 — 700 Mbps</option>
+<option>MicroBiz 3500 — 1 Gbps</option>
 
-<option>FlexiBiz 3000 — 500 Mbps — ₱3000</option>
-<option>FlexiBiz 5000 — 800 Mbps — ₱5000</option>
-<option>FlexiBiz 7000 — 1 Gbps — ₱7000</option>
+<option>FlexiBiz 3000 — 500 Mbps</option>
+<option>FlexiBiz 5000 — 800 Mbps</option>
+<option>FlexiBiz 7000 — 1 Gbps</option>
 
 </select>
 
-<select id="status" class="w-full p-3 rounded bg-slate-900">
+<select id="status" class="w-full p-3 bg-slate-900 rounded">
 
 <option>Application</option>
 <option>OMD</option>
@@ -260,11 +233,9 @@ By Randy Tadlas
 
 </select>
 
-<button class="w-full bg-blue-600 p-3 rounded">
-Save
-</button>
+<button class="bg-blue-600 w-full p-3 rounded">Save</button>
 
-<button type="button" id="cancel" class="w-full bg-slate-700 p-3 rounded">
+<button type="button" id="cancel" class="bg-slate-700 w-full p-3 rounded">
 Cancel
 </button>
 
@@ -275,6 +246,7 @@ Cancel
 </div>
 
 
+
 <script>
 
 const $=id=>document.getElementById(id)
@@ -282,47 +254,98 @@ const $=id=>document.getElementById(id)
 let records=JSON.parse(localStorage.getItem("crm"))||[]
 
 let map
+let marker
 let chart
 
-function save(){
-localStorage.setItem("crm",JSON.stringify(records))
+const napLocations=[
+
+{name:"Tagbilaran NAP",lat:9.65,lng:123.85},
+
+{name:"Tubigon NAP",lat:9.95,lng:123.96},
+
+{name:"Panglao NAP",lat:9.58,lng:123.74}
+
+]
+
+function initMap(){
+
+map=L.map('map').setView([9.65,123.85],11)
+
+L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map)
+
 }
 
-function scrollToSection(id){
-document.getElementById(id).scrollIntoView({behavior:"smooth"})
+function distance(lat1,lon1,lat2,lon2){
+
+const R=6371
+
+const dLat=(lat2-lat1)*Math.PI/180
+const dLon=(lon2-lon1)*Math.PI/180
+
+const a=
+Math.sin(dLat/2)**2+
+Math.cos(lat1*Math.PI/180)*
+Math.cos(lat2*Math.PI/180)*
+Math.sin(dLon/2)**2
+
+const c=2*Math.atan2(Math.sqrt(a),Math.sqrt(1-a))
+
+return R*c*1000
+
 }
 
-function price(plan){
-return parseInt(plan.match(/₱(\d+)/)[1])
+async function checkFiber(){
+
+let addr=$("checkAddress").value
+
+let res=await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${addr}`)
+
+let data=await res.json()
+
+let lat=data[0].lat
+let lon=data[0].lon
+
+if(marker) map.removeLayer(marker)
+
+marker=L.marker([lat,lon]).addTo(map)
+
+map.setView([lat,lon],15)
+
+let nearest=null
+let min=999999
+
+napLocations.forEach(n=>{
+
+let d=distance(lat,lon,n.lat,n.lng)
+
+if(d<min){
+min=d
+nearest=n
 }
 
-function commission(plan){
-let p=price(plan)
-if(p<=1500)return 800
-if(p<=2500)return 1200
-return 2000
-}
+})
 
-function renderStats(){
+let status="Not Available"
 
-let installed=records.filter(r=>r.status==="Installed").length
-let comm=records.reduce((t,r)=>t+commission(r.plan),0)
+if(min<300) status="Fiber Available"
 
-$("dashboard").innerHTML=`
+else if(min<700) status="Possible Extension"
 
-<div class="card"><p>Applications</p><h2>${records.length}</h2></div>
-<div class="card"><p>Installed</p><h2>${installed}</h2></div>
-<div class="card"><p>Commission</p><h2>₱${comm}</h2></div>
-<div class="card"><p>Pending</p><h2>${records.length-installed}</h2></div>
+$("fiberResult").innerHTML=`
+
+<b>${status}</b><br>
+Nearest Node: ${nearest.name}<br>
+Distance: ${Math.round(min)} meters
 
 `
+
 }
 
 function renderTable(){
 
 $("table").innerHTML=""
 
-records.forEach((r,i)=>{
+records.forEach(r=>{
 
 let tr=document.createElement("tr")
 
@@ -333,12 +356,6 @@ tr.innerHTML=`
 <td>${r.phone}</td>
 <td>${r.plan}</td>
 <td>${r.status}</td>
-<td>₱${commission(r.plan)}</td>
-
-<td>
-<button onclick="advance(${i})"><i data-lucide="arrow-right"></i></button>
-<button onclick="delRec(${i})"><i data-lucide="trash"></i></button>
-</td>
 
 `
 
@@ -346,79 +363,35 @@ $("table").appendChild(tr)
 
 })
 
-lucide.createIcons()
-}
-
-function renderChart(){
-
-let stats={}
-records.forEach(r=>{
-stats[r.plan]=(stats[r.plan]||0)+1
-})
-
-let labels=Object.keys(stats)
-let data=Object.values(stats)
-
-if(chart)chart.destroy()
-
-chart=new Chart(document.getElementById("salesChart"),{
-type:"bar",
-data:{labels:labels,datasets:[{label:"Plan Sales",data:data}]}
-})
-}
-
-function advance(i){
-const order=["Application","OMD","Approved","Scheduled","Installed"]
-let idx=order.indexOf(records[i].status)
-if(idx<order.length-1)records[i].status=order[idx+1]
-save()
-renderStats()
-renderTable()
-renderChart()
-}
-
-function delRec(i){
-records.splice(i,1)
-save()
-renderStats()
-renderTable()
-renderChart()
 }
 
 $("btn-add").onclick=()=>{$("modal").classList.remove("hidden")}
 $("cancel").onclick=()=>{$("modal").classList.add("hidden")}
 
 $("form").onsubmit=e=>{
+
 e.preventDefault()
 
 records.push({
+
 code:$("code").value,
 name:$("name").value,
 phone:$("phone").value,
 address:$("address").value,
 plan:$("plan").value,
 status:$("status").value
+
 })
 
-save()
+localStorage.setItem("crm",JSON.stringify(records))
 
 $("modal").classList.add("hidden")
 
-renderStats()
 renderTable()
-renderChart()
+
 }
 
-function initMap(){
-map=L.map('map').setView([10.3157,123.8854],12)
-L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map)
-}
-
-renderStats()
 renderTable()
-renderChart()
-
-lucide.createIcons()
 
 window.onload=initMap
 
