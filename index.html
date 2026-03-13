@@ -1,6 +1,5 @@
 <!doctype html>
 <html lang="en">
-
 <head>
 
 <meta charset="UTF-8">
@@ -25,6 +24,13 @@ color:#f1f5f9;
 font-family:'Fraunces',serif;
 }
 
+.card{
+background:#1e293b;
+border:1px solid #334155;
+border-radius:12px;
+padding:14px;
+}
+
 .modal{
 position:fixed;
 inset:0;
@@ -32,49 +38,27 @@ background:rgba(0,0,0,.6);
 display:flex;
 align-items:center;
 justify-content:center;
+padding:20px;
 }
 
 </style>
 
 </head>
 
+
 <body class="flex flex-col min-h-screen">
 
 
-<header class="flex items-center justify-between px-6 py-4 bg-slate-800 border-b border-slate-700">
+<header class="flex items-center justify-between px-4 py-3 bg-slate-800 border-b border-slate-700">
 
-<div class="flex items-center gap-4">
+<div class="flex items-center gap-3">
 
-<img src="https://www.google.com/url?sa=i&url=https%3A%2F%2Fwww.youtube.com%2Fc%2FConvergeICTSolutionsInc%2Fplaylists&psig=AOvVaw0qq6In4exuBMnnBV7zf5u-&ust=1773468358418000&source=images&cd=vfe&opi=89978449&ved=0CBUQjRxqFwoTCMDr9s6anJMDFQAAAAAdAAAAABAS" class="h-10">
+<img src="https://seeklogo.com/images/C/converge-ict-logo-7F4C8A2C1B-seeklogo.com.png" class="h-8">
 
 <div>
-<h1 class="font-display text-xl">Agent Dashboard</h1>
-<p class="text-sm text-slate-400">Converge Sales CRM</p>
+<h1 class="font-display text-lg">Agent CRM</h1>
+<p class="text-xs text-slate-400">Converge Sales</p>
 </div>
-
-</div>
-
-
-<div class="flex gap-3 flex-wrap">
-
-<button id="btn-calendar" class="px-3 py-2 bg-slate-700 rounded text-sm">
-Calendar
-</button>
-
-<button id="btn-export" class="px-3 py-2 bg-slate-700 rounded text-sm">
-Export
-</button>
-
-<label class="px-3 py-2 bg-slate-700 rounded text-sm cursor-pointer">
-Import
-<input type="file" id="importFile" hidden>
-</label>
-
-<button id="btn-add"
-class="px-3 py-2 bg-blue-500 rounded text-sm flex gap-2 items-center">
-<i data-lucide="plus"></i>
-New
-</button>
 
 </div>
 
@@ -82,121 +66,106 @@ New
 
 
 
-<main class="p-6 flex-1">
+<main class="p-4 flex-1">
 
 
-<div id="stats" class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6"></div>
-
-
-
-<div class="bg-slate-800 border border-slate-700 rounded-xl p-4 mb-6">
-
-<h3 class="font-display mb-3">Plan Analytics</h3>
-
-<div id="planStats" class="grid grid-cols-2 md:grid-cols-4 gap-3"></div>
-
-</div>
+<div id="stats" class="grid grid-cols-2 gap-3 mb-4"></div>
 
 
 
-<div class="flex gap-3 mb-4 flex-wrap">
+<div class="flex gap-2 mb-4">
 
 <input id="search"
-placeholder="Search customer..."
-class="flex-1 px-4 py-2 bg-slate-800 border border-slate-700 rounded">
-
-<select id="filter"
-class="px-4 py-2 bg-slate-800 border border-slate-700 rounded">
-
-<option value="all">All Status</option>
-<option>Application</option>
-<option>OMD</option>
-<option>Approved</option>
-<option>Scheduled</option>
-<option>Installed</option>
-
-</select>
+placeholder="Search customer"
+class="flex-1 px-3 py-2 bg-slate-800 border border-slate-700 rounded">
 
 </div>
 
 
 
-<div class="border border-slate-700 rounded-xl overflow-x-auto">
+<div id="planStats" class="card mb-4 text-xs"></div>
 
-<table class="w-full text-sm">
 
-<thead class="bg-slate-800 text-slate-400">
 
-<tr>
-
-<th class="px-4 py-3 text-left">Code</th>
-<th class="px-4 py-3 text-left">Customer</th>
-<th class="px-4 py-3 text-left">Phone</th>
-<th class="px-4 py-3 text-left">Plan</th>
-<th class="px-4 py-3 text-left">Status</th>
-<th class="px-4 py-3 text-left">Commission</th>
-<th class="px-4 py-3 text-left">Actions</th>
-
-</tr>
-
-</thead>
-
-<tbody id="table"></tbody>
-
-</table>
-
-</div>
+<div id="list" class="space-y-3"></div>
 
 </main>
 
 
 
-<footer class="text-center text-sm text-slate-400 py-4 border-t border-slate-700 bg-slate-900">
+<!-- ACTION BAR -->
+
+<div class="fixed bottom-0 left-0 right-0 bg-slate-900 border-t border-slate-700 p-3 flex justify-around">
+
+<button id="btn-add">
+<i data-lucide="plus"></i>
+</button>
+
+<button id="btn-calendar">
+<i data-lucide="calendar"></i>
+</button>
+
+<button id="btn-export">
+<i data-lucide="download"></i>
+</button>
+
+<label>
+<i data-lucide="upload"></i>
+<input type="file" id="importFile" hidden>
+</label>
+
+</div>
+
+
+
+<footer class="text-center text-xs text-slate-400 py-3 mt-12">
 
 © 2026 Converge Agent CRM  
-<br>
 By Randy Tadlas
 
 </footer>
 
 
 
+<!-- MODAL -->
+
 <div id="modal" class="modal hidden">
 
-<div class="bg-slate-800 border border-slate-700 rounded-xl p-6 w-full max-w-lg">
+<div class="card w-full max-w-lg">
 
-<h2 class="font-display text-lg mb-4">New Application</h2>
+<h2 class="font-display mb-3">New Application</h2>
 
-<form id="form" class="space-y-3">
+<form id="form" class="space-y-2">
 
-<input id="code" placeholder="Application Code"
-class="w-full px-4 py-2 bg-slate-900 border border-slate-700 rounded">
+<input id="code" placeholder="Code"
+class="w-full px-3 py-2 bg-slate-900 border border-slate-700 rounded">
 
 <input id="name" placeholder="Customer Name"
-class="w-full px-4 py-2 bg-slate-900 border border-slate-700 rounded">
+class="w-full px-3 py-2 bg-slate-900 border border-slate-700 rounded">
 
-<input id="phone" placeholder="Phone Number"
-class="w-full px-4 py-2 bg-slate-900 border border-slate-700 rounded">
-
-<input id="address" placeholder="Address"
-class="w-full px-4 py-2 bg-slate-900 border border-slate-700 rounded">
+<input id="phone" placeholder="Phone"
+class="w-full px-3 py-2 bg-slate-900 border border-slate-700 rounded">
 
 
 <select id="plan"
-class="w-full px-4 py-2 bg-slate-900 border border-slate-700 rounded">
+class="w-full px-3 py-2 bg-slate-900 border border-slate-700 rounded">
+
+<option>Surf2Sawa 25 Mbps — ₱700</option>
+
+<option>Super FiberX 1349 — 200 Mbps — ₱1349</option>
+<option>Super FiberX 1599 — 400 Mbps — ₱1599</option>
+<option>Super FiberX 2599 — 800 Mbps — ₱2599</option>
 
 <option>FiberX 1500 — 300 Mbps — ₱1500</option>
 <option>FiberX 2000 — 500 Mbps — ₱2000</option>
 <option>FiberX 2500 — 700 Mbps — ₱2500</option>
 <option>FiberX 3500 — 1 Gbps — ₱3500</option>
 
-<option>Super FiberX 1349 — 200 Mbps — ₱1349</option>
-<option>Super FiberX 1599 — 400 Mbps — ₱1599</option>
-
-<option>GameChanger EZ — 400 Mbps — ₱1800</option>
+<option>GameChanger EZ 1800 — 400 Mbps — ₱1800</option>
+<option>GameChanger Pro 2500 — 700 Mbps — ₱2500</option>
 
 <option>FiberX Time-of-Day 1699 — 400 Mbps Day / 600 Mbps Night — ₱1699</option>
-<option>FiberX Time-of-Day 3000 — 800 Mbps Day / 600 Mbps Night — ₱3000</option>
+<option>FiberX Time-of-Day 3000 — 800 Mbps Day / 1 Gbps Night — ₱3000</option>
 
 <option>FiberXtreme 4500 — 400 Mbps — ₱4500</option>
 <option>FiberXtreme 7000 — 800 Mbps — ₱7000</option>
@@ -204,8 +173,11 @@ class="w-full px-4 py-2 bg-slate-900 border border-slate-700 rounded">
 </select>
 
 
+<div id="planInfo" class="text-xs text-slate-400"></div>
+
+
 <select id="status"
-class="w-full px-4 py-2 bg-slate-900 border border-slate-700 rounded">
+class="w-full px-3 py-2 bg-slate-900 border border-slate-700 rounded">
 
 <option>Application</option>
 <option>OMD</option>
@@ -216,17 +188,14 @@ class="w-full px-4 py-2 bg-slate-900 border border-slate-700 rounded">
 </select>
 
 
-<label class="text-xs text-slate-400">Installation Date</label>
 <input type="date" id="install"
-class="w-full px-4 py-2 bg-slate-900 border border-slate-700 rounded">
+class="w-full px-3 py-2 bg-slate-900 border border-slate-700 rounded">
 
-
-<label class="text-xs text-slate-400">Follow Up Date</label>
 <input type="date" id="follow"
-class="w-full px-4 py-2 bg-slate-900 border border-slate-700 rounded">
+class="w-full px-3 py-2 bg-slate-900 border border-slate-700 rounded">
 
 
-<div class="flex gap-3 pt-2">
+<div class="flex gap-2 pt-2">
 
 <button class="flex-1 py-2 bg-blue-500 rounded">
 Save
@@ -251,51 +220,55 @@ Cancel
 
 const $ = id => document.getElementById(id)
 
-let records = JSON.parse(localStorage.getItem("convergeCRM")) || []
+let records = JSON.parse(localStorage.getItem("crm")) || []
 
-
-function saveData(){
-localStorage.setItem("convergeCRM",JSON.stringify(records))
+function save(){
+localStorage.setItem("crm",JSON.stringify(records))
 }
 
 
 
-function getCommission(plan){
+function getPrice(plan){
 
-const price=parseInt(plan.match(/₱(\d+)/)[1])
+return parseInt(plan.match(/₱(\d+)/)[1])
+
+}
+
+
+
+function commission(plan){
+
+let price = getPrice(plan)
 
 if(price<=1500) return 800
 if(price<=2500) return 1200
-if(price>=3000) return 2000
+return 2000
 
-return 1000
 }
 
 
 
 function renderStats(){
 
-let installed=records.filter(r=>r.status==="Installed").length
+let installed = records.filter(r=>r.status==="Installed").length
 
-let commission=records
-.filter(r=>r.status==="Installed")
-.reduce((sum,r)=>sum+getCommission(r.plan),0)
+let comm = records.reduce((t,r)=>t+commission(r.plan),0)
 
 $("stats").innerHTML=`
 
-<div class="bg-slate-800 p-4 rounded">
+<div class="card">
 <p class="text-xs text-slate-400">TOTAL</p>
-<p class="text-2xl font-bold">${records.length}</p>
+<p class="text-xl font-bold">${records.length}</p>
 </div>
 
-<div class="bg-slate-800 p-4 rounded">
+<div class="card">
 <p class="text-xs text-slate-400">INSTALLED</p>
-<p class="text-2xl font-bold">${installed}</p>
+<p class="text-xl font-bold">${installed}</p>
 </div>
 
-<div class="bg-slate-800 p-4 rounded">
+<div class="card">
 <p class="text-xs text-slate-400">COMMISSION</p>
-<p class="text-2xl font-bold text-green-400">₱${commission}</p>
+<p class="text-xl font-bold text-green-400">₱${comm}</p>
 </div>
 
 `
@@ -312,60 +285,45 @@ records.forEach(r=>{
 stats[r.plan]=(stats[r.plan]||0)+1
 })
 
-$("planStats").innerHTML=""
+let html="<b>Plan Sales</b><br>"
 
-Object.entries(stats).forEach(([plan,count])=>{
-
-let div=document.createElement("div")
-
-div.className="bg-slate-900 p-3 rounded text-sm"
-
-div.innerHTML=`
-<p class="text-slate-400">${plan}</p>
-<p class="text-lg font-bold">${count}</p>
-`
-
-$("planStats").appendChild(div)
-
+Object.entries(stats).forEach(([p,c])=>{
+html+=`${p} : ${c}<br>`
 })
+
+$("planStats").innerHTML=html
 
 }
 
 
 
-function renderTable(){
+function renderList(){
 
 let search=$("search").value.toLowerCase()
-let status=$("filter").value
 
-$("table").innerHTML=""
+$("list").innerHTML=""
 
-records.filter(r=>{
-
-let s=r.name.toLowerCase().includes(search)
-let st=status==="all"||r.status===status
-
-return s&&st
-
-})
+records.filter(r=>r.name.toLowerCase().includes(search))
 .forEach((r,i)=>{
 
-let commission=getCommission(r.plan)
+let div=document.createElement("div")
 
-let tr=document.createElement("tr")
+div.className="card"
 
-tr.className="border-t border-slate-700"
+div.innerHTML=`
 
-tr.innerHTML=`
+<div class="flex justify-between">
+<b>${r.name}</b>
+<span class="text-xs">${r.status}</span>
+</div>
 
-<td class="px-4 py-3">${r.code}</td>
-<td class="px-4 py-3">${r.name}</td>
-<td class="px-4 py-3">${r.phone}</td>
-<td class="px-4 py-3">${r.plan}</td>
-<td class="px-4 py-3">${r.status}</td>
-<td class="px-4 py-3 text-green-400">₱${commission}</td>
+<p class="text-xs text-slate-400">${r.plan}</p>
 
-<td class="px-4 py-3 flex gap-2">
+<div class="flex justify-between mt-2 text-xs">
+
+<span>Commission ₱${commission(r.plan)}</span>
+
+<div class="flex gap-2">
 
 <button onclick="advance(${i})">
 <i data-lucide="arrow-right"></i>
@@ -375,10 +333,13 @@ tr.innerHTML=`
 <i data-lucide="trash"></i>
 </button>
 
-</td>
+</div>
+
+</div>
+
 `
 
-$("table").appendChild(tr)
+$("list").appendChild(div)
 
 })
 
@@ -397,10 +358,10 @@ let idx=order.indexOf(records[i].status)
 if(idx<order.length-1)
 records[i].status=order[idx+1]
 
-saveData()
+save()
 
 renderStats()
-renderTable()
+renderList()
 renderPlanStats()
 
 }
@@ -411,10 +372,10 @@ function delRec(i){
 
 records.splice(i,1)
 
-saveData()
+save()
 
 renderStats()
-renderTable()
+renderList()
 renderPlanStats()
 
 }
@@ -446,7 +407,6 @@ records.push({
 code:$("code").value,
 name:$("name").value,
 phone:$("phone").value,
-address:$("address").value,
 plan:$("plan").value,
 status:$("status").value,
 install:$("install").value,
@@ -454,13 +414,51 @@ follow:$("follow").value
 
 })
 
-saveData()
+save()
 
 $("modal").classList.add("hidden")
 
 renderStats()
-renderTable()
+renderList()
 renderPlanStats()
+
+}
+
+
+
+$("btn-export").onclick=()=>{
+
+let blob=new Blob([JSON.stringify(records)],{type:"application/json"})
+
+let a=document.createElement("a")
+
+a.href=URL.createObjectURL(blob)
+
+a.download="convergeCRM.json"
+
+a.click()
+
+}
+
+
+
+$("importFile").onchange=e=>{
+
+let reader=new FileReader()
+
+reader.onload=function(){
+
+records=JSON.parse(reader.result)
+
+save()
+
+renderStats()
+renderList()
+renderPlanStats()
+
+}
+
+reader.readAsText(e.target.files[0])
 
 }
 
@@ -482,50 +480,24 @@ alert(txt)
 
 
 
-$("btn-export").onclick=()=>{
+$("plan").onchange=function(){
 
-let blob=new Blob([JSON.stringify(records)],{type:"application/json"})
+let plan=this.value
 
-let a=document.createElement("a")
-a.href=URL.createObjectURL(blob)
-a.download="convergeCRM.json"
-a.click()
+let price=getPrice(plan)
 
-}
-
-
-
-$("importFile").onchange=e=>{
-
-let file=e.target.files[0]
-
-let reader=new FileReader()
-
-reader.onload=function(){
-
-records=JSON.parse(reader.result)
-
-saveData()
-
-renderStats()
-renderTable()
-renderPlanStats()
-
-}
-
-reader.readAsText(file)
+$("planInfo").innerText=`Price: ₱${price} | Commission: ₱${commission(plan)}`
 
 }
 
 
 
-$("search").oninput=renderTable
-$("filter").onchange=renderTable
+$("search").oninput=renderList
 
 
 
 renderStats()
-renderTable()
+renderList()
 renderPlanStats()
 
 lucide.createIcons()
