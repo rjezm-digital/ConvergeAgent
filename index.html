@@ -11,26 +11,44 @@
 body{
 font-family:Arial;
 margin:0;
-background:#eef1f7;
+background:linear-gradient(135deg,#4a6cf7,#6a11cb);
+height:100vh;
 }
 
-/* LOGIN */
+/* LOGIN UI */
 
 .login{
-width:320px;
+width:340px;
 margin:120px auto;
 background:white;
-padding:30px;
-border-radius:10px;
-box-shadow:0 10px 20px rgba(0,0,0,0.1);
+padding:40px;
+border-radius:12px;
+box-shadow:0 15px 40px rgba(0,0,0,0.2);
+text-align:center;
+}
+
+.login h2{
+margin-bottom:20px;
 }
 
 .login input{
 width:100%;
-padding:10px;
+padding:12px;
 margin:10px 0;
 border-radius:6px;
 border:1px solid #ddd;
+font-size:14px;
+}
+
+.login button{
+width:100%;
+padding:12px;
+border:none;
+background:#4a6cf7;
+color:white;
+border-radius:6px;
+cursor:pointer;
+font-size:15px;
 }
 
 /* SIDEBAR */
@@ -49,7 +67,7 @@ width:100%;
 margin:8px 0;
 background:#2f3d63;
 border:none;
-padding:8px;
+padding:10px;
 color:white;
 border-radius:6px;
 cursor:pointer;
@@ -59,16 +77,22 @@ cursor:pointer;
 background:#4a6cf7;
 }
 
+.logout{
+background:#ff5e62!important;
+}
+
 .main{
 margin-left:250px;
 padding:30px;
+background:#eef1f7;
+min-height:100vh;
 }
 
 .section{
 display:none;
 }
 
-/* CARDS */
+/* DASHBOARD CARDS */
 
 .cards{
 display:grid;
@@ -81,6 +105,7 @@ margin-bottom:30px;
 padding:20px;
 color:white;
 border-radius:10px;
+font-size:18px;
 }
 
 .c1{background:#6a11cb;}
@@ -104,12 +129,22 @@ table{
 width:100%;
 border-collapse:collapse;
 background:white;
+border-radius:8px;
+overflow:hidden;
+}
+
+th{
+background:#4a6cf7;
+color:white;
 }
 
 th,td{
 padding:10px;
 border-bottom:1px solid #eee;
+text-align:center;
 }
+
+/* STATUS COLORS */
 
 .status{
 padding:4px 8px;
@@ -138,6 +173,7 @@ border:none;
 
 #map{
 height:450px;
+border-radius:10px;
 }
 
 </style>
@@ -155,18 +191,6 @@ height:450px;
 
 <button onclick="login()">Login</button>
 
-<p style="font-size:12px">
-
-Agents:<br>
-agent1 / 1234<br>
-agent2 / 1234<br>
-agent3 / 1234<br><br>
-
-Admin:<br>
-admin / admin123
-
-</p>
-
 </div>
 
 <div id="dashboard" style="display:none">
@@ -178,6 +202,8 @@ admin / admin123
 <button onclick="showSection('dash')">Monitoring</button>
 <button onclick="showSection('subs')">Subscribers</button>
 <button onclick="showSection('mapsec')">Map</button>
+
+<button class="logout" onclick="logout()">Logout</button>
 
 </div>
 
@@ -319,9 +345,7 @@ let stages=[
 ]
 
 function save(){
-
 localStorage.setItem("subs",JSON.stringify(subscribers))
-
 }
 
 function login(){
@@ -344,9 +368,19 @@ render()
 
 }else{
 
-alert("Invalid username or password")
+alert("Invalid login")
 
 }
+
+}
+
+function logout(){
+
+currentUser=""
+isAdmin=false
+
+document.getElementById("dashboard").style.display="none"
+document.getElementById("login").style.display="block"
 
 }
 
@@ -388,9 +422,8 @@ render()
 
 function nextStep(i){
 
-if(subscribers[i].status<stages.length-1){
+if(subscribers[i].status<stages.length-1)
 subscribers[i].status++
-}
 
 save()
 render()
@@ -399,9 +432,8 @@ render()
 
 function backStep(i){
 
-if(subscribers[i].status>0){
+if(subscribers[i].status>0)
 subscribers[i].status--
-}
 
 save()
 render()
@@ -478,19 +510,16 @@ table.innerHTML+=`
 })
 
 let board=document.getElementById("leaderboard")
-
 board.innerHTML=""
 
 Object.keys(agents).sort((a,b)=>agents[b].earn-agents[a].earn).forEach(a=>{
 
 board.innerHTML+=`
-
 <tr>
 <td>${a}</td>
 <td>${agents[a].count}</td>
 <td>₱${agents[a].earn}</td>
 </tr>
-
 `
 
 })
