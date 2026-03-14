@@ -4,6 +4,8 @@
 
 <title>Fiber Agent Panel</title>
 
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
 <style>
 
 body{
@@ -12,8 +14,6 @@ font-family:Arial;
 display:flex;
 background:#eef1f7;
 }
-
-/* SIDEBAR */
 
 .sidebar{
 width:240px;
@@ -38,18 +38,10 @@ color:white;
 cursor:pointer;
 }
 
-.sidebar button.active{
-background:#4e6cff;
-}
-
-/* MAIN */
-
 .main{
 flex:1;
 padding:30px;
 }
-
-/* CARDS */
 
 .cards{
 display:grid;
@@ -72,8 +64,6 @@ font-size:18px;
 .cyan{background:#00bcd4}
 .brown{background:#795548}
 
-/* FORM */
-
 input,select{
 width:100%;
 padding:12px;
@@ -81,8 +71,6 @@ margin:8px 0;
 border-radius:6px;
 border:1px solid #ccc;
 }
-
-/* TABLE */
 
 table{
 width:100%;
@@ -106,6 +94,13 @@ cursor:pointer;
 font-size:18px;
 }
 
+.chartbox{
+background:white;
+padding:20px;
+border-radius:10px;
+margin-top:20px;
+}
+
 </style>
 </head>
 
@@ -115,7 +110,7 @@ font-size:18px;
 
 <h2>Agent Panel</h2>
 
-<button onclick="showPage('monitor')" class="active">Monitoring</button>
+<button onclick="showPage('monitor')">Monitoring</button>
 <button onclick="showPage('subs')">Subscribers</button>
 
 </div>
@@ -131,41 +126,39 @@ font-size:18px;
 <div class="cards">
 
 <div class="card purple">
-Applications
-<br>
+Applications<br>
 <span id="apps">0</span>
 </div>
 
 <div class="card orange">
-Pending
-<br>
+Pending<br>
 <span id="pending">0</span>
 </div>
 
 <div class="card green">
-Installed
-<br>
+Installed<br>
 <span id="installed">0</span>
 </div>
 
 <div class="card red">
-Total Earnings
-<br>
+Total Earnings<br>
 ₱<span id="total">0</span>
 </div>
 
 <div class="card cyan">
-Weekly Earnings
-<br>
+Weekly Earnings<br>
 ₱<span id="weekly">0</span>
 </div>
 
 <div class="card brown">
-Monthly Earnings
-<br>
+Monthly Earnings<br>
 ₱<span id="monthly">0</span>
 </div>
 
+</div>
+
+<div class="chartbox">
+<canvas id="salesChart"></canvas>
 </div>
 
 </div>
@@ -192,7 +185,6 @@ Monthly Earnings
 <option value="2000">FiberX 2000</option>
 <option value="2500">FiberX 2500</option>
 <option value="3500">FiberX 3500</option>
-<option value="7000">FiberX 7000</option>
 
 <option value="1700">FiberX 1500 + Vision</option>
 <option value="2200">FiberX 2000 + Vision</option>
@@ -311,7 +303,12 @@ table.innerHTML=""
 let apps=0
 let pending=0
 let installed=0
+
 let total=0
+let weekly=0
+let monthly=0
+
+let today=new Date()
 
 subs.forEach((s,i)=>{
 
@@ -320,12 +317,18 @@ if(s.agent!==agent) return
 apps++
 
 if(stages[s.status]=="Pending") pending++
+
 if(stages[s.status]=="Installed"){
 
 installed++
 
 let com=(s.plan/2)-50
 total+=com
+
+let diff=(today-new Date(s.date))/(1000*60*60*24)
+
+if(diff<=7) weekly+=com
+if(diff<=30) monthly+=com
 
 }
 
@@ -351,7 +354,30 @@ table.innerHTML+=`
 apps.innerText=apps
 pending.innerText=pending
 installed.innerText=installed
+
 total.innerText=total
+weekly.innerText=weekly
+monthly.innerText=monthly
+
+drawChart(installed,pending,apps)
+
+}
+
+function drawChart(installed,pending,apps){
+
+new Chart(document.getElementById("salesChart"),{
+
+type:"bar",
+
+data:{
+labels:["Applications","Pending","Installed"],
+datasets:[{
+label:"Sales Data",
+data:[apps,pending,installed]
+}]
+}
+
+})
 
 }
 
