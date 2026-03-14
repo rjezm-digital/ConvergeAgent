@@ -5,30 +5,28 @@
 <title>FiberAgent CRM</title>
 
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+<link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster/dist/MarkerCluster.css"/>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
 <style>
 
 body{
 font-family:Arial;
 margin:0;
-background:linear-gradient(135deg,#4a6cf7,#6a11cb);
-height:100vh;
+background:#eef1f7;
 }
 
-/* LOGIN UI */
+/* LOGIN */
 
 .login{
-width:340px;
+width:360px;
 margin:120px auto;
 background:white;
 padding:40px;
-border-radius:12px;
-box-shadow:0 15px 40px rgba(0,0,0,0.2);
+border-radius:10px;
+box-shadow:0 10px 30px rgba(0,0,0,0.2);
 text-align:center;
-}
-
-.login h2{
-margin-bottom:20px;
 }
 
 .login input{
@@ -37,18 +35,16 @@ padding:12px;
 margin:10px 0;
 border-radius:6px;
 border:1px solid #ddd;
-font-size:14px;
 }
 
 .login button{
 width:100%;
 padding:12px;
-border:none;
 background:#4a6cf7;
+border:none;
 color:white;
 border-radius:6px;
 cursor:pointer;
-font-size:15px;
 }
 
 /* SIDEBAR */
@@ -65,16 +61,12 @@ color:white;
 .sidebar button{
 width:100%;
 margin:8px 0;
+padding:10px;
 background:#2f3d63;
 border:none;
-padding:10px;
 color:white;
 border-radius:6px;
 cursor:pointer;
-}
-
-.sidebar button:hover{
-background:#4a6cf7;
 }
 
 .logout{
@@ -91,8 +83,6 @@ min-height:100vh;
 .section{
 display:none;
 }
-
-/* DASHBOARD CARDS */
 
 .cards{
 display:grid;
@@ -115,22 +105,10 @@ font-size:18px;
 .c5{background:#00bcd4;}
 .c6{background:#795548;}
 
-input,select{
-width:100%;
-padding:10px;
-margin:6px 0;
-border-radius:6px;
-border:1px solid #ddd;
-}
-
-/* TABLE */
-
 table{
 width:100%;
 border-collapse:collapse;
 background:white;
-border-radius:8px;
-overflow:hidden;
 }
 
 th{
@@ -144,35 +122,14 @@ border-bottom:1px solid #eee;
 text-align:center;
 }
 
-/* STATUS COLORS */
-
-.status{
-padding:4px 8px;
-border-radius:6px;
-color:white;
-font-size:12px;
-}
-
-.applied{background:#9e9e9e;}
-.omd{background:#2196f3;}
-.pending{background:#ff9800;}
-.approved{background:#4caf50;}
-.forinstallation{background:#9c27b0;}
-.installed{background:#2e7d32;}
-
-.smallbtn{
-font-size:11px;
-padding:4px 6px;
-}
-
-.delete{
-background:red;
-color:white;
-border:none;
-}
-
 #map{
-height:450px;
+height:500px;
+}
+
+.chartbox{
+background:white;
+padding:20px;
+margin-top:20px;
 border-radius:10px;
 }
 
@@ -200,6 +157,7 @@ border-radius:10px;
 <h2 id="panelTitle">FiberAgent</h2>
 
 <button onclick="showSection('dash')">Monitoring</button>
+<button onclick="showSection('add')">Add Subscriber</button>
 <button onclick="showSection('subs')">Subscribers</button>
 <button onclick="showSection('mapsec')">Map</button>
 
@@ -209,42 +167,14 @@ border-radius:10px;
 
 <div class="main">
 
-<div id="dash" class="section">
+<!-- ADD SUBSCRIBER -->
 
-<h2>Sales Monitoring</h2>
-
-<div class="cards">
-
-<div class="card c1">Applications<br><span id="total">0</span></div>
-<div class="card c2">Pending<br><span id="pending">0</span></div>
-<div class="card c3">Installed<br><span id="installed">0</span></div>
-<div class="card c4">Total Earnings<br>₱<span id="commission">0</span></div>
-<div class="card c5">Weekly Earnings<br>₱<span id="weekly">0</span></div>
-<div class="card c6">Monthly Earnings<br>₱<span id="monthly">0</span></div>
-
-</div>
-
-<h3>Agent Leaderboard</h3>
-
-<table>
-<thead>
-<tr>
-<th>Agent</th>
-<th>Installed</th>
-<th>Earnings</th>
-</tr>
-</thead>
-<tbody id="leaderboard"></tbody>
-</table>
-
-</div>
-
-<div id="subs" class="section">
+<div id="add" class="section">
 
 <h2>Add Subscriber</h2>
 
 <input id="name" placeholder="Subscriber Name">
-<input id="phone" placeholder="Phone Number">
+<input id="phone" placeholder="Phone">
 <input id="code" placeholder="Application Code">
 <input id="lat" placeholder="Latitude">
 <input id="lng" placeholder="Longitude">
@@ -283,9 +213,15 @@ border-radius:10px;
 
 </select>
 
-<button onclick="add()">Add Subscriber</button>
+<button onclick="addSubscriber()">Add</button>
 
-<br><br>
+</div>
+
+<!-- SUBSCRIBERS -->
+
+<div id="subs" class="section">
+
+<h2>Subscribers</h2>
 
 <table>
 
@@ -295,9 +231,7 @@ border-radius:10px;
 <th>Name</th>
 <th>Plan</th>
 <th>Status</th>
-<th>←</th>
-<th>→</th>
-<th>✕</th>
+<th>Next</th>
 </tr>
 </thead>
 
@@ -306,6 +240,31 @@ border-radius:10px;
 </table>
 
 </div>
+
+<!-- MONITORING -->
+
+<div id="dash" class="section">
+
+<h2>Monitoring</h2>
+
+<div class="cards">
+
+<div class="card c1">Applications<br><span id="apps">0</span></div>
+<div class="card c2">Pending<br><span id="pending">0</span></div>
+<div class="card c3">For Installation<br><span id="install">0</span></div>
+<div class="card c4">Installed<br><span id="installed">0</span></div>
+<div class="card c5">Commission<br>₱<span id="released">0</span></div>
+<div class="card c6">Weekly Commission<br>₱<span id="weekly">0</span></div>
+
+</div>
+
+<div class="chartbox">
+<canvas id="agentChart"></canvas>
+</div>
+
+</div>
+
+<!-- MAP -->
 
 <div id="mapsec" class="section">
 
@@ -320,6 +279,7 @@ border-radius:10px;
 </div>
 
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="https://unpkg.com/leaflet.markercluster/dist/leaflet.markercluster.js"></script>
 
 <script>
 
@@ -335,14 +295,7 @@ let isAdmin=false
 
 let subscribers=JSON.parse(localStorage.getItem("subs")||"[]")
 
-let stages=[
-"Applied",
-"OMD",
-"Pending",
-"Approved",
-"For Installation",
-"Installed"
-]
+let stages=["Applied","OMD","Pending","Approved","For Installation","Installed"]
 
 function save(){
 localStorage.setItem("subs",JSON.stringify(subscribers))
@@ -350,25 +303,21 @@ localStorage.setItem("subs",JSON.stringify(subscribers))
 
 function login(){
 
-let u=document.getElementById("user").value
-let p=document.getElementById("pass").value
+let u=user.value
+let p=pass.value
 
 if(users[u] && users[u]===p){
 
 currentUser=u
 isAdmin=(u==="admin")
 
-document.getElementById("login").style.display="none"
-document.getElementById("dashboard").style.display="block"
+login.style.display="none"
+dashboard.style.display="block"
 
-document.getElementById("panelTitle").innerText=isAdmin?"Admin Panel":"Agent Panel"
+panelTitle.innerText=isAdmin?"Admin Panel":"Agent Panel"
 
 showSection("dash")
 render()
-
-}else{
-
-alert("Invalid login")
 
 }
 
@@ -376,11 +325,8 @@ alert("Invalid login")
 
 function logout(){
 
-currentUser=""
-isAdmin=false
-
-document.getElementById("dashboard").style.display="none"
-document.getElementById("login").style.display="block"
+dashboard.style.display="none"
+login.style.display="block"
 
 }
 
@@ -394,24 +340,15 @@ if(id==="mapsec") loadMap()
 
 }
 
-function add(){
-
-let name=document.getElementById("name").value
-let phone=document.getElementById("phone").value
-let code=document.getElementById("code").value
-let plan=document.getElementById("plan").value
-let lat=document.getElementById("lat").value
-let lng=document.getElementById("lng").value
+function addSubscriber(){
 
 subscribers.push({
 agent:currentUser,
-name,
-phone,
-code,
-plan,
-lat,
-lng,
+name:name.value,
+plan:parseInt(plan.value),
 status:0,
+lat:lat.value,
+lng:lng.value,
 date:new Date()
 })
 
@@ -420,29 +357,10 @@ render()
 
 }
 
-function nextStep(i){
+function nextStatus(i){
 
-if(subscribers[i].status<stages.length-1)
+if(subscribers[i].status<5)
 subscribers[i].status++
-
-save()
-render()
-
-}
-
-function backStep(i){
-
-if(subscribers[i].status>0)
-subscribers[i].status--
-
-save()
-render()
-
-}
-
-function deleteRow(i){
-
-subscribers.splice(i,1)
 
 save()
 render()
@@ -454,11 +372,12 @@ function render(){
 let table=document.getElementById("table")
 table.innerHTML=""
 
-let total=0
+let apps=0
 let pending=0
+let install=0
 let installed=0
+let released=0
 let weekly=0
-let monthly=0
 
 let agents={}
 
@@ -468,72 +387,71 @@ subscribers.forEach((s,i)=>{
 
 if(!isAdmin && s.agent!==currentUser) return
 
+apps++
+
 let stage=stages[s.status]
+
+if(stage==="Pending") pending++
+if(stage==="For Installation") install++
+
 let commission=(s.plan/2)-50
 
 if(stage==="Installed"){
 
 installed++
-total+=commission
+released+=commission
 
-if(!agents[s.agent]) agents[s.agent]={count:0,earn:0}
-
-agents[s.agent].count++
-agents[s.agent].earn+=commission
+if(!agents[s.agent]) agents[s.agent]=0
+agents[s.agent]++
 
 let diff=(now-new Date(s.date))/86400000
 
 if(diff<=7) weekly+=commission
-if(diff<=30) monthly+=commission
 
-}else{
-pending++
 }
 
 table.innerHTML+=`
-
 <tr>
-
 <td>${s.agent}</td>
 <td>${s.name}</td>
 <td>₱${s.plan}</td>
-<td><span class="status ${stage.toLowerCase().replace(' ','')}">${stage}</span></td>
-
-<td><button class="smallbtn" onclick="backStep(${i})">←</button></td>
-<td><button class="smallbtn" onclick="nextStep(${i})">→</button></td>
-<td><button class="delete smallbtn" onclick="deleteRow(${i})">✕</button></td>
-
-</tr>
-
-`
-
-})
-
-let board=document.getElementById("leaderboard")
-board.innerHTML=""
-
-Object.keys(agents).sort((a,b)=>agents[b].earn-agents[a].earn).forEach(a=>{
-
-board.innerHTML+=`
-<tr>
-<td>${a}</td>
-<td>${agents[a].count}</td>
-<td>₱${agents[a].earn}</td>
+<td>${stage}</td>
+<td><button onclick="nextStatus(${i})">Next</button></td>
 </tr>
 `
 
 })
 
-document.getElementById("total").innerText=subscribers.length
-document.getElementById("pending").innerText=pending
-document.getElementById("installed").innerText=installed
-document.getElementById("commission").innerText=total
-document.getElementById("weekly").innerText=weekly
-document.getElementById("monthly").innerText=monthly
+apps.innerText=apps
+pending.innerText=pending
+install.innerText=install
+installed.innerText=installed
+released.innerText=released
+weekly.innerText=weekly
+
+drawCharts(agents)
+
+}
+
+function drawCharts(agentData){
+
+new Chart(document.getElementById("agentChart"),{
+
+type:'bar',
+data:{
+labels:Object.keys(agentData),
+datasets:[{
+label:'Installs per Agent',
+data:Object.values(agentData)
+}]
+}
+
+})
 
 }
 
 let map
+let cluster
 
 function loadMap(){
 
@@ -543,21 +461,25 @@ map=L.map('map').setView([9.65,124.02],11)
 
 L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map)
 
+cluster=L.markerClusterGroup()
+
 subscribers.forEach(s=>{
 
 if(!isAdmin && s.agent!==currentUser) return
 
 if(s.lat && s.lng){
 
-L.marker([s.lat,s.lng])
-.addTo(map)
-.bindPopup(s.name+"<br>"+s.agent)
+cluster.addLayer(L.marker([s.lat,s.lng]))
 
 }
 
 })
 
+map.addLayer(cluster)
+
 }
+
+render()
 
 </script>
 
