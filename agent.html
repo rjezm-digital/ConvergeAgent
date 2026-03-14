@@ -2,7 +2,7 @@
 <html>
 <head>
 
-<title>Fiber Agent Panel</title>
+<title>Agent Panel</title>
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
@@ -16,7 +16,7 @@ background:#eef1f7;
 }
 
 .sidebar{
-width:240px;
+width:230px;
 background:#25324a;
 color:white;
 padding:20px;
@@ -29,8 +29,8 @@ margin-bottom:30px;
 
 .sidebar button{
 width:100%;
-padding:12px;
 margin:8px 0;
+padding:12px;
 border:none;
 border-radius:8px;
 background:#3c4c6e;
@@ -164,7 +164,7 @@ Monthly Earnings<br>
 </div>
 
 
-<!-- SUBSCRIBERS -->
+<!-- SUBSCRIBERS PAGE -->
 
 <div id="subs" style="display:none">
 
@@ -177,34 +177,41 @@ Monthly Earnings<br>
 
 <select id="plan">
 
+<!-- SUPER FIBER -->
 <option value="1349">Super FiberX Play 1349</option>
 <option value="1599">Super FiberX Max 1599</option>
 <option value="2599">Super FiberX Ultra 2599</option>
 
+<!-- FIBERX -->
 <option value="1500">FiberX 1500</option>
 <option value="2000">FiberX 2000</option>
 <option value="2500">FiberX 2500</option>
 <option value="3500">FiberX 3500</option>
+<option value="7000">FiberX 7000</option>
 
+<!-- BUNDLES -->
 <option value="1700">FiberX 1500 + Vision</option>
 <option value="2200">FiberX 2000 + Vision</option>
 <option value="2700">FiberX 2500 + Vision</option>
 
+<!-- TOD -->
 <option value="1699">TOD 1699</option>
 <option value="1999">TOD 1999</option>
 <option value="3000">TOD 3000</option>
 <option value="3500">TOD 3500</option>
 
-<option value="1500">FlexiBIZ 1500</option>
-<option value="2000">FlexiBIZ 2000</option>
-<option value="3000">FlexiBIZ 3000</option>
-<option value="5000">FlexiBIZ 5000</option>
+<!-- FLEXIBIZ -->
+<option value="1500">FlexiBiz 1500</option>
+<option value="2000">FlexiBiz 2000</option>
+<option value="3000">FlexiBiz 3000</option>
+<option value="5000">FlexiBiz 5000</option>
 
-<option value="1449">MicroBIZ MAX 1449</option>
-<option value="1549">MicroBIZ MAX 1549</option>
-<option value="1749">MicroBIZ MAX 1749</option>
-<option value="2099">MicroBIZ MAX 2099</option>
-<option value="2449">MicroBIZ MAX 2449</option>
+<!-- MICROBIZ -->
+<option value="1449">MicroBiz MAX 1449</option>
+<option value="1549">MicroBiz MAX 1549</option>
+<option value="1749">MicroBiz MAX 1749</option>
+<option value="2099">MicroBiz MAX 2099</option>
+<option value="2449">MicroBiz MAX 2449</option>
 
 </select>
 
@@ -234,9 +241,9 @@ Monthly Earnings<br>
 
 <script>
 
-let agent="agent1"
+let agent = localStorage.getItem("agent") || "agent1"
 
-let subs=JSON.parse(localStorage.getItem("subs")||"[]")
+let subs = JSON.parse(localStorage.getItem("subs") || "[]")
 
 const stages=[
 "Applied",
@@ -246,6 +253,8 @@ const stages=[
 "For Installation",
 "Installed"
 ]
+
+let chart
 
 function showPage(p){
 
@@ -264,11 +273,11 @@ function addSubscriber(){
 
 subs.push({
 agent:agent,
-name:name.value,
-address:address.value,
-phone:phone.value,
-code:code.value,
-plan:parseInt(plan.value),
+name:document.getElementById("name").value,
+address:document.getElementById("address").value,
+phone:document.getElementById("phone").value,
+code:document.getElementById("code").value,
+plan:parseInt(document.getElementById("plan").value),
 status:0,
 date:new Date()
 })
@@ -298,12 +307,13 @@ render()
 
 function render(){
 
+let table=document.getElementById("table")
+
 table.innerHTML=""
 
 let apps=0
 let pending=0
 let installed=0
-
 let total=0
 let weekly=0
 let monthly=0
@@ -323,6 +333,7 @@ if(stages[s.status]=="Installed"){
 installed++
 
 let com=(s.plan/2)-50
+
 total+=com
 
 let diff=(today-new Date(s.date))/(1000*60*60*24)
@@ -351,21 +362,22 @@ table.innerHTML+=`
 
 })
 
-apps.innerText=apps
-pending.innerText=pending
-installed.innerText=installed
+document.getElementById("apps").innerText=apps
+document.getElementById("pending").innerText=pending
+document.getElementById("installed").innerText=installed
+document.getElementById("total").innerText=total
+document.getElementById("weekly").innerText=weekly
+document.getElementById("monthly").innerText=monthly
 
-total.innerText=total
-weekly.innerText=weekly
-monthly.innerText=monthly
-
-drawChart(installed,pending,apps)
+drawChart(apps,pending,installed)
 
 }
 
-function drawChart(installed,pending,apps){
+function drawChart(apps,pending,installed){
 
-new Chart(document.getElementById("salesChart"),{
+if(chart) chart.destroy()
+
+chart=new Chart(document.getElementById("salesChart"),{
 
 type:"bar",
 
