@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html>
+<head>
+
+<title>Admin Dashboard</title>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<style>
+
+body{
+margin:0;
+font-family:Arial;
+display:flex;
+}
+
+/* SIDEBAR */
+
+.sidebar{
+width:260px;
+height:100vh;
+background:linear-gradient(180deg,#6a5acd,#4a6cf7);
+color:white;
+padding:20px;
+}
+
+.sidebar button{
+width:100%;
+margin:10px 0;
+padding:10px;
+border:none;
+border-radius:6px;
+cursor:pointer;
+}
+
+/* MAIN */
+
+.main{
+flex:1;
+background:#eef1f7;
+padding:30px;
+}
+
+.cards{
+display:grid;
+grid-template-columns:repeat(3,1fr);
+gap:20px;
+margin-bottom:30px;
+}
+
+.card{
+padding:20px;
+border-radius:12px;
+color:white;
+}
+
+.c1{background:#6a5acd;}
+.c2{background:#ff6a88;}
+.c3{background:#36d1dc;}
+.c4{background:#43e97b;}
+.c5{background:#ff9966;}
+.c6{background:#00c6ff;}
+
+table{
+width:100%;
+background:white;
+border-collapse:collapse;
+margin-top:20px;
+}
+
+th{
+background:#4a6cf7;
+color:white;
+}
+
+th,td{
+padding:10px;
+border-bottom:1px solid #eee;
+}
+
+</style>
+
+</head>
+
+<body>
+
+<div class="sidebar">
+
+<h2>Admin Panel</h2>
+
+<button onclick="logout()">Logout</button>
+
+</div>
+
+<div class="main">
+
+<h1>Dashboard</h1>
+
+<div class="cards">
+
+<div class="card c1">Applications<br><span id="apps">0</span></div>
+<div class="card c2">Pending<br><span id="pending">0</span></div>
+<div class="card c3">Installed<br><span id="installed">0</span></div>
+<div class="card c4">For Installation<br><span id="install">0</span></div>
+<div class="card c5">Total Commission<br>₱<span id="released">0</span></div>
+<div class="card c6">Commission This Week<br>₱<span id="weekly">0</span></div>
+
+</div>
+
+<canvas id="agentChart"></canvas>
+
+<h2>Installed Subscribers</h2>
+
+<table>
+
+<thead>
+<tr>
+<th>Agent</th>
+<th>Subscriber</th>
+<th>Plan</th>
+<th>Commission</th>
+</tr>
+</thead>
+
+<tbody id="table"></tbody>
+
+</table>
+
+</div>
+
+<script>
+
+let subscribers=JSON.parse(localStorage.getItem("subs")||"[]")
+
+let stages=["Applied","OMD","Pending","Approved","For Installation","Installed"]
+
+let agents={}
+let apps=0
+let pending=0
+let install=0
+let installed=0
+let released=0
+let weekly=0
+
+let now=new Date()
+
+subscribers.forEach(s=>{
+
+apps++
+
+let stage=stages[s.status]
+
+if(stage==="Pending") pending++
+if(stage==="For Installation") install++
+
+let commission=(s.plan/2)-50
+
+if(stage==="Installed"){
+
+installed++
+released+=commission
+
+if(!agents[s.agent]) agents[s.agent]=0
+agents[s.agent]++
+
+let diff=(now-new Date(s.date))/86400000
+
+if(diff<=7) weekly+=commission
+
+document.getElementById("table").innerHTML+=`
+<tr>
+<td>${s.agent}</td>
+<td>${s.name}</td>
+<td>${s.plan}</td>
+<td>₱${commission}</td>
+</tr>
+`
+
+}
+
+})
+
+apps.innerText=apps
+pending.innerText=pending
+install.innerText=install
+installed.innerText=installed
+released.innerText=released
+weekly.innerText=weekly
+
+new Chart(document.getElementById("agentChart"),{
+
+type:'bar',
+data:{
+labels:Object.keys(agents),
+datasets:[{
+label:'Installs per Agent',
+data:Object.values(agents)
+}]
+}
+
+})
+
+function logout(){
+window.location="index.html"
+}
+
+</script>
+
+</body>
+</html>

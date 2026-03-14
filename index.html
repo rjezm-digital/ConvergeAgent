@@ -4,33 +4,28 @@
 
 <title>FiberAgent CRM</title>
 
-<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
-<link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster/dist/MarkerCluster.css"/>
-<link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster/dist/MarkerCluster.Default.css"/>
-
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-
 <style>
 
 body{
-font-family:Arial;
 margin:0;
-background:#eef1f7;
+font-family:Arial;
+background:linear-gradient(135deg,#6a5acd,#4a6cf7);
+height:100vh;
+display:flex;
+justify-content:center;
+align-items:center;
 }
 
-/* LOGIN */
-
 .login{
-width:360px;
-margin:120px auto;
 background:white;
 padding:40px;
-border-radius:10px;
-box-shadow:0 10px 30px rgba(0,0,0,0.2);
+border-radius:12px;
+width:320px;
+box-shadow:0 10px 40px rgba(0,0,0,0.2);
 text-align:center;
 }
 
-.login input{
+input{
 width:100%;
 padding:12px;
 margin:10px 0;
@@ -38,7 +33,7 @@ border-radius:6px;
 border:1px solid #ddd;
 }
 
-.login button{
+button{
 width:100%;
 padding:12px;
 background:#4a6cf7;
@@ -46,109 +41,6 @@ border:none;
 color:white;
 border-radius:6px;
 cursor:pointer;
-}
-
-/* SIDEBAR */
-
-.sidebar{
-width:230px;
-background:#1f2a44;
-position:fixed;
-height:100%;
-padding:20px;
-color:white;
-}
-
-.sidebar button{
-width:100%;
-margin:8px 0;
-padding:10px;
-background:#2f3d63;
-border:none;
-color:white;
-border-radius:6px;
-cursor:pointer;
-}
-
-.logout{
-background:#ff5e62!important;
-}
-
-.main{
-margin-left:250px;
-padding:30px;
-background:#eef1f7;
-min-height:100vh;
-}
-
-.section{
-display:none;
-}
-
-/* CARDS */
-
-.cards{
-display:grid;
-grid-template-columns:repeat(3,1fr);
-gap:20px;
-margin-bottom:30px;
-}
-
-.card{
-padding:20px;
-color:white;
-border-radius:10px;
-font-size:18px;
-}
-
-.c1{background:#6a11cb;}
-.c2{background:#ff9800;}
-.c3{background:#4caf50;}
-.c4{background:#ff5e62;}
-.c5{background:#00bcd4;}
-.c6{background:#795548;}
-
-table{
-width:100%;
-border-collapse:collapse;
-background:white;
-}
-
-th{
-background:#4a6cf7;
-color:white;
-}
-
-th,td{
-padding:10px;
-border-bottom:1px solid #eee;
-text-align:center;
-}
-
-#map{
-height:520px;
-}
-
-.formbox{
-background:white;
-padding:20px;
-border-radius:10px;
-width:500px;
-}
-
-.formbox input,
-.formbox select{
-width:100%;
-padding:10px;
-margin:8px 0;
-}
-
-.formbox button{
-background:#4a6cf7;
-color:white;
-border:none;
-padding:10px;
-width:100%;
 }
 
 </style>
@@ -157,7 +49,7 @@ width:100%;
 
 <body>
 
-<div class="login" id="login">
+<div class="login">
 
 <h2>FiberAgent CRM</h2>
 
@@ -168,149 +60,6 @@ width:100%;
 
 </div>
 
-<div id="dashboard" style="display:none">
-
-<div class="sidebar">
-
-<h2 id="panelTitle">FiberAgent</h2>
-
-<button onclick="showSection('dash')">Monitoring</button>
-<button onclick="showSection('add')">Add Subscriber</button>
-<button onclick="showSection('subs')">Subscribers</button>
-<button onclick="showSection('mapsec')">Map</button>
-
-<button class="logout" onclick="logout()">Logout</button>
-
-</div>
-
-<div class="main">
-
-<!-- ADD SUBSCRIBER -->
-
-<div id="add" class="section">
-
-<div class="formbox">
-
-<h3>Add Subscriber</h3>
-
-<input id="name" placeholder="Subscriber Name">
-<input id="phone" placeholder="Phone Number">
-<input id="code" placeholder="Application Code">
-
-<select id="plan">
-
-<optgroup label="Super Fiber">
-<option value="1349">Super FiberX Play 1349</option>
-<option value="1599">Super FiberX Max 1599</option>
-<option value="2599">Super FiberX Ultra 2599</option>
-</optgroup>
-
-<optgroup label="FiberX">
-<option value="1500">FiberX 1500</option>
-<option value="2000">FiberX 2000</option>
-<option value="2500">FiberX 2500</option>
-<option value="3500">FiberX 3500</option>
-<option value="7000">FiberX 7000</option>
-</optgroup>
-
-<optgroup label="FiberX Bundles">
-<option value="1700">FiberX 1500 + Vision</option>
-<option value="2200">FiberX 2000 + Vision</option>
-<option value="2700">FiberX 2500 + Vision</option>
-</optgroup>
-
-<optgroup label="TOD">
-<option value="1699">TOD 1699</option>
-<option value="1999">TOD 1999</option>
-<option value="3000">TOD 3000</option>
-<option value="3500">TOD 3500</option>
-</optgroup>
-
-<optgroup label="FlexiBIZ">
-<option value="1500">FlexiBIZ 1500</option>
-<option value="2000">FlexiBIZ 2000</option>
-<option value="3000">FlexiBIZ 3000</option>
-<option value="5000">FlexiBIZ 5000</option>
-</optgroup>
-
-<optgroup label="MicroBIZ MAX">
-<option value="1449">MicroBIZ MAX 1449</option>
-<option value="1549">MicroBIZ MAX 1549</option>
-<option value="1749">MicroBIZ MAX 1749</option>
-<option value="2099">MicroBIZ MAX 2099</option>
-<option value="2449">MicroBIZ MAX 2449</option>
-</optgroup>
-
-</select>
-
-<input id="lat" placeholder="Latitude">
-<input id="lng" placeholder="Longitude">
-
-<button onclick="addSubscriber()">Add Subscriber</button>
-
-</div>
-
-</div>
-
-<!-- MONITORING -->
-
-<div id="dash" class="section">
-
-<h2>Monitoring</h2>
-
-<div class="cards">
-
-<div class="card c1">Applications<br><span id="apps">0</span></div>
-<div class="card c2">Pending<br><span id="pending">0</span></div>
-<div class="card c3">Installed<br><span id="installed">0</span></div>
-<div class="card c4">For Installation<br><span id="install">0</span></div>
-<div class="card c5">Total Released Commission<br>₱<span id="released">0</span></div>
-<div class="card c6">Commission This Week<br>₱<span id="weekly">0</span></div>
-
-</div>
-
-</div>
-
-<!-- ADMIN SUBSCRIBERS -->
-
-<div id="subs" class="section">
-
-<h2>Installed Subscribers by Agent</h2>
-
-<table>
-
-<thead>
-<tr>
-<th>Agent</th>
-<th>Subscriber</th>
-<th>Plan</th>
-<th>Commission</th>
-</tr>
-</thead>
-
-<tbody id="table"></tbody>
-
-</table>
-
-</div>
-
-<!-- MAP -->
-
-<div id="mapsec" class="section">
-
-<h2>Subscriber Map</h2>
-
-<div id="map"></div>
-
-</div>
-
-</div>
-
-</div>
-
-<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-<script src="https://unpkg.com/leaflet.markercluster/dist/leaflet.markercluster.js"></script>
-
 <script>
 
 let users={
@@ -320,17 +69,6 @@ agent3:"1234",
 admin:"admin123"
 }
 
-let currentUser=""
-let isAdmin=false
-
-let subscribers=JSON.parse(localStorage.getItem("subs")||"[]")
-
-let stages=["Applied","OMD","Pending","Approved","For Installation","Installed"]
-
-function save(){
-localStorage.setItem("subs",JSON.stringify(subscribers))
-}
-
 function login(){
 
 let u=document.getElementById("user").value
@@ -338,141 +76,18 @@ let p=document.getElementById("pass").value
 
 if(users[u] && users[u]===p){
 
-currentUser=u
-isAdmin=(u==="admin")
+if(u==="admin"){
+window.location="admin.html"
+}else{
+localStorage.setItem("agent",u)
+window.location="agent.html"
+}
 
-document.getElementById("login").style.display="none"
-document.getElementById("dashboard").style.display="block"
-
-document.getElementById("panelTitle").innerText=isAdmin?"Admin Panel":"Agent Panel"
-
-showSection("dash")
-render()
-
+}else{
+alert("Invalid login")
 }
 
 }
-
-function logout(){
-
-document.getElementById("dashboard").style.display="none"
-document.getElementById("login").style.display="block"
-
-}
-
-function showSection(id){
-
-document.querySelectorAll(".section").forEach(s=>s.style.display="none")
-document.getElementById(id).style.display="block"
-
-if(id==="mapsec") loadMap()
-
-}
-
-function addSubscriber(){
-
-subscribers.push({
-agent:currentUser,
-name:document.getElementById("name").value,
-plan:parseInt(document.getElementById("plan").value),
-lat:document.getElementById("lat").value,
-lng:document.getElementById("lng").value,
-status:0,
-date:new Date()
-})
-
-save()
-render()
-
-}
-
-function render(){
-
-let apps=0
-let pending=0
-let install=0
-let installed=0
-let released=0
-let weekly=0
-
-let table=document.getElementById("table")
-table.innerHTML=""
-
-let now=new Date()
-
-subscribers.forEach((s)=>{
-
-if(!isAdmin && s.agent!==currentUser) return
-
-apps++
-
-let stage=stages[s.status]
-
-if(stage==="Pending") pending++
-if(stage==="For Installation") install++
-
-let commission=(s.plan/2)-50
-
-if(stage==="Installed"){
-
-installed++
-released+=commission
-
-let diff=(now-new Date(s.date))/86400000
-if(diff<=7) weekly+=commission
-
-table.innerHTML+=`
-<tr>
-<td>${s.agent}</td>
-<td>${s.name}</td>
-<td>₱${s.plan}</td>
-<td>₱${commission}</td>
-</tr>
-`
-
-}
-
-})
-
-document.getElementById("apps").innerText=apps
-document.getElementById("pending").innerText=pending
-document.getElementById("install").innerText=install
-document.getElementById("installed").innerText=installed
-document.getElementById("released").innerText=released
-document.getElementById("weekly").innerText=weekly
-
-}
-
-let map
-let cluster
-
-function loadMap(){
-
-if(map) return
-
-map=L.map('map').setView([9.65,124.02],11)
-
-L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map)
-
-cluster=L.markerClusterGroup({maxClusterRadius:60})
-
-subscribers.forEach(s=>{
-
-if(!isAdmin && s.agent!==currentUser) return
-
-if(s.lat && s.lng){
-
-cluster.addLayer(L.marker([s.lat,s.lng]))
-
-}
-
-})
-
-map.addLayer(cluster)
-
-}
-
-render()
 
 </script>
 

@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html>
+<head>
+
+<title>Agent Panel</title>
+
+<style>
+
+body{
+margin:0;
+font-family:Arial;
+display:flex;
+}
+
+.sidebar{
+width:260px;
+height:100vh;
+background:linear-gradient(180deg,#6a5acd,#4a6cf7);
+color:white;
+padding:20px;
+}
+
+.main{
+flex:1;
+background:#eef1f7;
+padding:30px;
+}
+
+.form{
+background:white;
+padding:20px;
+border-radius:12px;
+width:420px;
+}
+
+input,select{
+width:100%;
+padding:10px;
+margin:8px 0;
+}
+
+button{
+padding:10px;
+background:#4a6cf7;
+color:white;
+border:none;
+}
+
+table{
+width:100%;
+background:white;
+margin-top:20px;
+border-collapse:collapse;
+}
+
+th{
+background:#4a6cf7;
+color:white;
+}
+
+th,td{
+padding:10px;
+border-bottom:1px solid #eee;
+}
+
+</style>
+
+</head>
+
+<body>
+
+<div class="sidebar">
+
+<h2>Agent Panel</h2>
+
+<button onclick="logout()">Logout</button>
+
+</div>
+
+<div class="main">
+
+<div class="form">
+
+<h3>Add Subscriber</h3>
+
+<input id="name" placeholder="Subscriber Name">
+
+<select id="plan">
+
+<option value="1349">Super FiberX Play 1349</option>
+<option value="1599">Super FiberX Max 1599</option>
+<option value="2599">Super FiberX Ultra 2599</option>
+
+<option value="1500">FiberX 1500</option>
+<option value="2000">FiberX 2000</option>
+<option value="2500">FiberX 2500</option>
+<option value="3500">FiberX 3500</option>
+<option value="7000">FiberX 7000</option>
+
+<option value="1700">FiberX 1500 + Vision</option>
+<option value="2200">FiberX 2000 + Vision</option>
+<option value="2700">FiberX 2500 + Vision</option>
+
+<option value="1699">TOD 1699</option>
+<option value="1999">TOD 1999</option>
+<option value="3000">TOD 3000</option>
+<option value="3500">TOD 3500</option>
+
+<option value="1500">FlexiBIZ 1500</option>
+<option value="2000">FlexiBIZ 2000</option>
+<option value="3000">FlexiBIZ 3000</option>
+<option value="5000">FlexiBIZ 5000</option>
+
+<option value="1449">MicroBIZ MAX 1449</option>
+<option value="1549">MicroBIZ MAX 1549</option>
+<option value="1749">MicroBIZ MAX 1749</option>
+<option value="2099">MicroBIZ MAX 2099</option>
+<option value="2449">MicroBIZ MAX 2449</option>
+
+</select>
+
+<button onclick="add()">Add Subscriber</button>
+
+</div>
+
+<table>
+
+<thead>
+<tr>
+<th>Name</th>
+<th>Plan</th>
+<th>Status</th>
+<th>Next</th>
+</tr>
+</thead>
+
+<tbody id="table"></tbody>
+
+</table>
+
+</div>
+
+<script>
+
+let agent=localStorage.getItem("agent")
+
+let subscribers=JSON.parse(localStorage.getItem("subs")||"[]")
+
+let stages=["Applied","OMD","Pending","Approved","For Installation","Installed"]
+
+function save(){
+localStorage.setItem("subs",JSON.stringify(subscribers))
+}
+
+function add(){
+
+subscribers.push({
+agent:agent,
+name:name.value,
+plan:parseInt(plan.value),
+status:0,
+date:new Date()
+})
+
+save()
+render()
+
+}
+
+function next(i){
+
+if(subscribers[i].status<5)
+subscribers[i].status++
+
+save()
+render()
+
+}
+
+function render(){
+
+table.innerHTML=""
+
+subscribers.forEach((s,i)=>{
+
+if(s.agent!==agent) return
+
+table.innerHTML+=`
+<tr>
+<td>${s.name}</td>
+<td>${s.plan}</td>
+<td>${stages[s.status]}</td>
+<td><button onclick="next(${i})">Next</button></td>
+</tr>
+`
+
+})
+
+}
+
+function logout(){
+window.location="index.html"
+}
+
+render()
+
+</script>
+
+</body>
+</html>
