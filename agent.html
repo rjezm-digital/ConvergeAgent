@@ -4,6 +4,10 @@
 
 <title>Agent Panel</title>
 
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
 <style>
 
 body{
@@ -13,11 +17,11 @@ display:flex;
 }
 
 .sidebar{
-width:260px;
-height:100vh;
+width:250px;
 background:linear-gradient(180deg,#6a5acd,#4a6cf7);
 color:white;
 padding:20px;
+height:100vh;
 }
 
 .main{
@@ -26,41 +30,36 @@ background:#eef1f7;
 padding:30px;
 }
 
+.cards{
+display:grid;
+grid-template-columns:repeat(3,1fr);
+gap:20px;
+}
+
+.card{
+background:white;
+padding:20px;
+border-radius:10px;
+}
+
 .form{
 background:white;
 padding:20px;
-border-radius:12px;
-width:420px;
-}
-
-input,select{
-width:100%;
-padding:10px;
-margin:8px 0;
-}
-
-button{
-padding:10px;
-background:#4a6cf7;
-color:white;
-border:none;
-}
-
-table{
-width:100%;
-background:white;
 margin-top:20px;
-border-collapse:collapse;
+border-radius:10px;
 }
 
-th{
-background:#4a6cf7;
-color:white;
+.sub{
+background:white;
+padding:15px;
+margin-top:10px;
+border-radius:10px;
 }
 
-th,td{
-padding:10px;
-border-bottom:1px solid #eee;
+#map{
+height:300px;
+margin-top:20px;
+border-radius:10px;
 }
 
 </style>
@@ -79,11 +78,25 @@ border-bottom:1px solid #eee;
 
 <div class="main">
 
+<div class="cards">
+
+<div class="card">Total Commission <span id="total">0</span></div>
+<div class="card">Weekly <span id="weekly">0</span></div>
+<div class="card">Monthly <span id="monthly">0</span></div>
+
+</div>
+
 <div class="form">
 
 <h3>Add Subscriber</h3>
 
-<input id="name" placeholder="Subscriber Name">
+<input id="name" placeholder="Name">
+<input id="address" placeholder="Address">
+<input id="phone" placeholder="Phone">
+<input id="code" placeholder="Application Code">
+
+<input id="lat" placeholder="Latitude">
+<input id="lng" placeholder="Longitude">
 
 <select id="plan">
 
@@ -95,27 +108,15 @@ border-bottom:1px solid #eee;
 <option value="2000">FiberX 2000</option>
 <option value="2500">FiberX 2500</option>
 <option value="3500">FiberX 3500</option>
-<option value="7000">FiberX 7000</option>
-
-<option value="1700">FiberX 1500 + Vision</option>
-<option value="2200">FiberX 2000 + Vision</option>
-<option value="2700">FiberX 2500 + Vision</option>
 
 <option value="1699">TOD 1699</option>
 <option value="1999">TOD 1999</option>
-<option value="3000">TOD 3000</option>
-<option value="3500">TOD 3500</option>
 
 <option value="1500">FlexiBIZ 1500</option>
 <option value="2000">FlexiBIZ 2000</option>
-<option value="3000">FlexiBIZ 3000</option>
-<option value="5000">FlexiBIZ 5000</option>
 
 <option value="1449">MicroBIZ MAX 1449</option>
 <option value="1549">MicroBIZ MAX 1549</option>
-<option value="1749">MicroBIZ MAX 1749</option>
-<option value="2099">MicroBIZ MAX 2099</option>
-<option value="2449">MicroBIZ MAX 2449</option>
 
 </select>
 
@@ -123,20 +124,11 @@ border-bottom:1px solid #eee;
 
 </div>
 
-<table>
+<h3>Click Map To Auto Fill Coordinates</h3>
 
-<thead>
-<tr>
-<th>Name</th>
-<th>Plan</th>
-<th>Status</th>
-<th>Next</th>
-</tr>
-</thead>
+<div id="map"></div>
 
-<tbody id="table"></tbody>
-
-</table>
+<div id="list"></div>
 
 </div>
 
@@ -144,19 +136,33 @@ border-bottom:1px solid #eee;
 
 let agent=localStorage.getItem("agent")
 
-let subscribers=JSON.parse(localStorage.getItem("subs")||"[]")
+let subs=JSON.parse(localStorage.getItem("subs")||"[]")
 
-let stages=["Applied","OMD","Pending","Approved","For Installation","Installed"]
+let map=L.map('map').setView([9.7,124],10)
+
+L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map)
+
+map.on("click",e=>{
+
+lat.value=e.latlng.lat
+lng.value=e.latlng.lng
+
+})
 
 function save(){
-localStorage.setItem("subs",JSON.stringify(subscribers))
+localStorage.setItem("subs",JSON.stringify(subs))
 }
 
 function add(){
 
-subscribers.push({
+subs.push({
 agent:agent,
 name:name.value,
+address:address.value,
+phone:phone.value,
+code:code.value,
+lat:lat.value,
+lng:lng.value,
 plan:parseInt(plan.value),
 status:0,
 date:new Date()
@@ -169,8 +175,7 @@ render()
 
 function next(i){
 
-if(subscribers[i].status<5)
-subscribers[i].status++
+if(subs[i].status<5) subs[i].status++
 
 save()
 render()
@@ -179,19 +184,26 @@ render()
 
 function render(){
 
-table.innerHTML=""
+list.innerHTML=""
 
-subscribers.forEach((s,i)=>{
+subs.forEach((s,i)=>{
 
 if(s.agent!==agent) return
 
-table.innerHTML+=`
-<tr>
-<td>${s.name}</td>
-<td>${s.plan}</td>
-<td>${stages[s.status]}</td>
-<td><button onclick="next(${i})">Next</button></td>
-</tr>
+list.innerHTML+=`
+
+<div class="sub">
+
+<b>${s.name}</b><br>
+
+Plan: ${s.plan}<br>
+
+Status: ${s.status}<br>
+
+<button onclick="next(${i})">Next Status</button>
+
+</div>
+
 `
 
 })
