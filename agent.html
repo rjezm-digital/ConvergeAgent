@@ -2,7 +2,7 @@
 <html>
 <head>
 
-<title>Agent Panel</title>
+<title>Fiber Agent Panel</title>
 
 <style>
 
@@ -13,29 +13,43 @@ display:flex;
 background:#eef1f7;
 }
 
+/* SIDEBAR */
+
 .sidebar{
-width:230px;
+width:240px;
 background:#25324a;
 color:white;
 padding:20px;
 height:100vh;
 }
 
+.sidebar h2{
+margin-bottom:30px;
+}
+
 .sidebar button{
 width:100%;
+padding:12px;
 margin:8px 0;
-padding:10px;
-background:#3a4a6a;
 border:none;
+border-radius:8px;
+background:#3c4c6e;
 color:white;
-border-radius:6px;
 cursor:pointer;
 }
+
+.sidebar button.active{
+background:#4e6cff;
+}
+
+/* MAIN */
 
 .main{
 flex:1;
 padding:30px;
 }
+
+/* CARDS */
 
 .cards{
 display:grid;
@@ -48,26 +62,48 @@ margin-bottom:30px;
 padding:20px;
 border-radius:10px;
 color:white;
+font-size:18px;
 }
 
-.c1{background:#6a11cb}
-.c2{background:#ff9800}
-.c3{background:#4caf50}
-.c4{background:#ff5e62}
-.c5{background:#00bcd4}
-.c6{background:#795548}
+.purple{background:#6a11cb}
+.orange{background:#ff9800}
+.green{background:#4caf50}
+.red{background:#ff5e62}
+.cyan{background:#00bcd4}
+.brown{background:#795548}
+
+/* FORM */
 
 input,select{
 width:100%;
-padding:10px;
-margin:6px 0;
+padding:12px;
+margin:8px 0;
+border-radius:6px;
+border:1px solid #ccc;
 }
 
-.sub{
+/* TABLE */
+
+table{
+width:100%;
 background:white;
-padding:15px;
-border-radius:8px;
-margin:10px 0;
+border-collapse:collapse;
+margin-top:20px;
+}
+
+th{
+background:#f2f2f2;
+}
+
+th,td{
+padding:10px;
+border-bottom:1px solid #eee;
+text-align:center;
+}
+
+.action{
+cursor:pointer;
+font-size:18px;
 }
 
 </style>
@@ -79,33 +115,65 @@ margin:10px 0;
 
 <h2>Agent Panel</h2>
 
-<button onclick="showPage('monitor')">Monitoring</button>
-<button onclick="showPage('add')">Add Subscriber</button>
-
-<button onclick="logout()">Logout</button>
+<button onclick="showPage('monitor')" class="active">Monitoring</button>
+<button onclick="showPage('subs')">Subscribers</button>
 
 </div>
 
 <div class="main">
 
-<div id="monitorPage">
+<!-- MONITORING -->
+
+<div id="monitor">
 
 <h2>Sales Monitoring</h2>
 
 <div class="cards">
 
-<div class="card c1">Applications <br><span id="apps">0</span></div>
-<div class="card c2">Pending <br><span id="pending">0</span></div>
-<div class="card c3">Installed <br><span id="installed">0</span></div>
+<div class="card purple">
+Applications
+<br>
+<span id="apps">0</span>
+</div>
+
+<div class="card orange">
+Pending
+<br>
+<span id="pending">0</span>
+</div>
+
+<div class="card green">
+Installed
+<br>
+<span id="installed">0</span>
+</div>
+
+<div class="card red">
+Total Earnings
+<br>
+₱<span id="total">0</span>
+</div>
+
+<div class="card cyan">
+Weekly Earnings
+<br>
+₱<span id="weekly">0</span>
+</div>
+
+<div class="card brown">
+Monthly Earnings
+<br>
+₱<span id="monthly">0</span>
+</div>
 
 </div>
 
-<div id="subscriberList"></div>
-
 </div>
 
 
-<div id="addPage" style="display:none">
+<!-- SUBSCRIBERS -->
+
+<div id="subs" style="display:none">
 
 <h2>Add Subscriber</h2>
 
@@ -113,9 +181,6 @@ margin:10px 0;
 <input id="address" placeholder="Address">
 <input id="phone" placeholder="Phone Number">
 <input id="code" placeholder="Application Code">
-
-<input id="lat" placeholder="Latitude">
-<input id="lng" placeholder="Longitude">
 
 <select id="plan">
 
@@ -127,22 +192,49 @@ margin:10px 0;
 <option value="2000">FiberX 2000</option>
 <option value="2500">FiberX 2500</option>
 <option value="3500">FiberX 3500</option>
+<option value="7000">FiberX 7000</option>
 
 <option value="1700">FiberX 1500 + Vision</option>
 <option value="2200">FiberX 2000 + Vision</option>
+<option value="2700">FiberX 2500 + Vision</option>
 
 <option value="1699">TOD 1699</option>
 <option value="1999">TOD 1999</option>
+<option value="3000">TOD 3000</option>
+<option value="3500">TOD 3500</option>
 
 <option value="1500">FlexiBIZ 1500</option>
 <option value="2000">FlexiBIZ 2000</option>
+<option value="3000">FlexiBIZ 3000</option>
+<option value="5000">FlexiBIZ 5000</option>
 
 <option value="1449">MicroBIZ MAX 1449</option>
 <option value="1549">MicroBIZ MAX 1549</option>
+<option value="1749">MicroBIZ MAX 1749</option>
+<option value="2099">MicroBIZ MAX 2099</option>
+<option value="2449">MicroBIZ MAX 2449</option>
 
 </select>
 
 <button onclick="addSubscriber()">Add Subscriber</button>
+
+<table>
+
+<thead>
+<tr>
+<th>Agent</th>
+<th>Name</th>
+<th>Plan</th>
+<th>Status</th>
+<th>←</th>
+<th>→</th>
+<th>X</th>
+</tr>
+</thead>
+
+<tbody id="table"></tbody>
+
+</table>
 
 </div>
 
@@ -150,23 +242,25 @@ margin:10px 0;
 
 <script>
 
-let agent=localStorage.getItem("agent")
+let agent="agent1"
+
 let subs=JSON.parse(localStorage.getItem("subs")||"[]")
 
-const stages=["Applied","OMD","Pending","Approved","For Installation","Installed"]
+const stages=[
+"Applied",
+"OMD",
+"Pending",
+"Approved",
+"For Installation",
+"Installed"
+]
 
-function showPage(page){
+function showPage(p){
 
-document.getElementById("monitorPage").style.display="none"
-document.getElementById("addPage").style.display="none"
+document.getElementById("monitor").style.display="none"
+document.getElementById("subs").style.display="none"
 
-if(page==="monitor"){
-document.getElementById("monitorPage").style.display="block"
-}
-
-if(page==="add"){
-document.getElementById("addPage").style.display="block"
-}
+document.getElementById(p).style.display="block"
 
 }
 
@@ -182,10 +276,9 @@ name:name.value,
 address:address.value,
 phone:phone.value,
 code:code.value,
-lat:lat.value,
-lng:lng.value,
-plan:plan.value,
-status:0
+plan:parseInt(plan.value),
+status:0,
+date:new Date()
 })
 
 save()
@@ -193,24 +286,32 @@ render()
 
 }
 
-function nextStatus(i){
-
-if(subs[i].status<5){
-subs[i].status++
+function next(i){
+if(subs[i].status<5) subs[i].status++
 save()
 render()
 }
 
+function prev(i){
+if(subs[i].status>0) subs[i].status--
+save()
+render()
+}
+
+function removeSub(i){
+subs.splice(i,1)
+save()
+render()
 }
 
 function render(){
 
-let list=document.getElementById("subscriberList")
-list.innerHTML=""
+table.innerHTML=""
 
 let apps=0
 let pending=0
 let installed=0
+let total=0
 
 subs.forEach((s,i)=>{
 
@@ -219,20 +320,29 @@ if(s.agent!==agent) return
 apps++
 
 if(stages[s.status]=="Pending") pending++
-if(stages[s.status]=="Installed") installed++
+if(stages[s.status]=="Installed"){
 
-list.innerHTML+=`
+installed++
 
-<div class="sub">
+let com=(s.plan/2)-50
+total+=com
 
-<b>${s.name}</b><br>
+}
 
-Plan: ${s.plan}<br>
-Status: ${stages[s.status]}<br>
+table.innerHTML+=`
 
-<button onclick="nextStatus(${i})">Next Status</button>
+<tr>
 
-</div>
+<td>${s.agent}</td>
+<td>${s.name}</td>
+<td>${s.plan}</td>
+<td>${stages[s.status]}</td>
+
+<td class="action" onclick="prev(${i})">←</td>
+<td class="action" onclick="next(${i})">→</td>
+<td class="action" onclick="removeSub(${i})">X</td>
+
+</tr>
 
 `
 
@@ -241,11 +351,8 @@ Status: ${stages[s.status]}<br>
 apps.innerText=apps
 pending.innerText=pending
 installed.innerText=installed
+total.innerText=total
 
-}
-
-function logout(){
-location="index.html"
 }
 
 render()
