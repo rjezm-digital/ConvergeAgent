@@ -47,6 +47,8 @@ flex:1;
 padding:30px;
 }
 
+/* CARDS */
+
 .cards{
 display:grid;
 grid-template-columns:repeat(3,1fr);
@@ -72,6 +74,8 @@ input,select{
 width:100%;
 padding:10px;
 margin:6px 0;
+border-radius:6px;
+border:1px solid #ddd;
 }
 
 button.add{
@@ -82,6 +86,8 @@ padding:10px;
 border-radius:6px;
 cursor:pointer;
 }
+
+/* TABLE */
 
 table{
 width:100%;
@@ -110,6 +116,7 @@ color:white;
 .encoded{background:#777}
 
 </style>
+
 </head>
 
 <body>
@@ -211,7 +218,7 @@ Monthly Earnings<br>
 <option value="5000">FlexiBiz 5000</option>
 <option value="7000">FlexiBiz 7000</option>
 
-<option value="10000">BIZ 10000</option>
+<option value="10000">Biz 10000</option>
 
 <option value="999">TOD 999</option>
 <option value="1299">TOD 1299</option>
@@ -226,6 +233,9 @@ Add Subscriber
 
 <tr>
 <th>Name</th>
+<th>Address</th>
+<th>Phone</th>
+<th>Application Code</th>
 <th>Plan</th>
 <th>Status</th>
 </tr>
@@ -306,7 +316,6 @@ let table=document.getElementById("subTable")
 table.innerHTML=""
 
 let applications=0
-let pending=0
 let installed=0
 let earnings=0
 
@@ -330,9 +339,19 @@ table.innerHTML+=`
 
 <td>${s.name}</td>
 
+<td>${s.address}</td>
+
+<td>${s.phone}</td>
+
+<td>${s.appcode}</td>
+
 <td>${s.plan}</td>
 
-<td><span class="status encoded">Encoded</span></td>
+<td>
+<span class="status encoded">
+Encoded
+</span>
+</td>
 
 </tr>
 
@@ -360,11 +379,9 @@ type:"bar",
 data:{
 labels:["Applications","Installed"],
 datasets:[{
-
-data:[0,0]
-
+data:[0,0],
+backgroundColor:["#7b1fa2","#4caf50"]
 }]
-
 }
 
 })
