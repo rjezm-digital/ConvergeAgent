@@ -2,101 +2,101 @@
 <html>
 <head>
 
-<title>Fiber CRM Login</title>
+<title>Fiber CRM</title>
 
 <style>
 
-body{
-font-family:Arial;
-background:#eef1f7;
-display:flex;
-justify-content:center;
-align-items:center;
-height:100vh;
+*{
+box-sizing:border-box;
 }
 
-.box{
+body{
+margin:0;
+font-family:Arial;
+background:linear-gradient(135deg,#0f2027,#203a43,#2c5364);
+height:100vh;
+display:flex;
+align-items:center;
+justify-content:center;
+}
+
+.login-box{
+width:380px;
 background:white;
-padding:30px;
-border-radius:10px;
-width:340px;
+border-radius:12px;
+padding:40px;
+box-shadow:0 20px 40px rgba(0,0,0,0.3);
+}
+
+.logo{
+font-size:26px;
+font-weight:bold;
+text-align:center;
+margin-bottom:5px;
+}
+
+.subtitle{
+text-align:center;
+color:#777;
+margin-bottom:30px;
 }
 
 input{
 width:100%;
-padding:10px;
-margin:8px 0;
+padding:12px;
+margin:10px 0;
+border-radius:6px;
+border:1px solid #ddd;
+font-size:14px;
 }
 
 button{
-padding:10px;
 width:100%;
+padding:12px;
 border:none;
+border-radius:6px;
 background:#4e6cff;
 color:white;
-border-radius:6px;
+font-size:15px;
 cursor:pointer;
+margin-top:10px;
 }
 
-.section{
-margin-bottom:20px;
+button:hover{
+background:#3b55e0;
 }
 
-h3{
-margin-bottom:5px;
+.footer{
+text-align:center;
+margin-top:20px;
+font-size:12px;
+color:#888;
 }
 
 </style>
+
 </head>
 
 <body>
 
-<div class="box">
+<div class="login-box">
 
-<h2>Fiber CRM</h2>
-
-<!-- AGENT LOGIN -->
-
-<div class="section">
-
-<h3>Agent Login</h3>
-
-<input id="agentUser" placeholder="Agent Username">
-
-<input id="agentPass" type="password" placeholder="Password">
-
-<button onclick="loginAgent()">Login Agent</button>
-
+<div class="logo">
+FiberAgent CRM
 </div>
 
-
-<!-- ADMIN LOGIN -->
-
-<div class="section">
-
-<h3>Admin Login</h3>
-
-<input id="adminUser" placeholder="Admin Username">
-
-<input id="adminPass" type="password" placeholder="Password">
-
-<button onclick="loginAdmin()">Login Admin</button>
-
+<div class="subtitle">
+ISP Sales & Installation Management
 </div>
 
+<input id="username" placeholder="Username">
 
-<!-- INSTALLER LOGIN -->
+<input id="password" type="password" placeholder="Password">
 
-<div class="section">
+<button onclick="login()">Login</button>
 
-<h3>Installer Team Login</h3>
-
-<input id="installerUser" placeholder="Team Name (TeamA / TeamB / TeamC)">
-
-<input id="installerPass" type="password" placeholder="Password">
-
-<button onclick="loginInstaller()">Login Installer</button>
-
+<div class="footer">
+Authorized users only
 </div>
 
 </div>
@@ -104,93 +104,57 @@ margin-bottom:5px;
 
 <script>
 
-/* AGENT LOGIN */
+function login(){
 
-function loginAgent(){
+let user=document.getElementById("username").value
+let pass=document.getElementById("password").value
 
-let u=document.getElementById("agentUser").value
-let p=document.getElementById("agentPass").value
+/* ADMIN */
 
-if(p==="1234"){
-
-localStorage.setItem("agent",u)
-
-window.location="agent.html"
-
-}
-
-else{
-
-alert("Invalid agent password")
-
-}
-
-}
-
-
-/* ADMIN LOGIN */
-
-function loginAdmin(){
-
-let u=document.getElementById("adminUser").value
-let p=document.getElementById("adminPass").value
-
-if(u==="admin" && p==="admin123"){
+if(user==="admin" && pass==="admin123"){
 
 window.location="admin.html"
-
-}
-
-else{
-
-alert("Invalid admin login")
-
-}
-
-}
-
-
-/* INSTALLER LOGIN */
-
-function loginInstaller(){
-
-let u=document.getElementById("installerUser").value
-let p=document.getElementById("installerPass").value
-
-if(p!=="1234"){
-
-alert("Invalid installer password")
-
 return
 
 }
 
-if(u==="TeamA"){
+/* INSTALLER */
+
+if(pass==="1234" && user==="teamA"){
 
 localStorage.setItem("installerTeam","Team A")
 window.location="installer.html"
+return
 
 }
 
-else if(u==="TeamB"){
+if(pass==="1234" && user==="teamB"){
 
 localStorage.setItem("installerTeam","Team B")
 window.location="installer.html"
+return
 
 }
 
-else if(u==="TeamC"){
+if(pass==="1234" && user==="teamC"){
 
 localStorage.setItem("installerTeam","Team C")
 window.location="installer.html"
+return
 
 }
 
-else{
+/* AGENT */
 
-alert("Installer team not recognized")
+if(pass==="1234"){
+
+localStorage.setItem("agent",user)
+window.location="agent.html"
+return
 
 }
+
+alert("Invalid login")
 
 }
 

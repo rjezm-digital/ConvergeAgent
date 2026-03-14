@@ -89,13 +89,52 @@ border-bottom:1px solid #eee;
 text-align:center;
 }
 
-.install{
+/* BUTTONS */
+
+.call{
 background:#4caf50;
 border:none;
-padding:8px 12px;
+padding:7px 10px;
 color:white;
 border-radius:6px;
 cursor:pointer;
+}
+
+.map{
+background:#2196f3;
+border:none;
+padding:7px 10px;
+color:white;
+border-radius:6px;
+cursor:pointer;
+}
+
+.nav{
+background:#ff9800;
+border:none;
+padding:7px 10px;
+color:white;
+border-radius:6px;
+cursor:pointer;
+}
+
+.install{
+background:#673ab7;
+border:none;
+padding:7px 10px;
+color:white;
+border-radius:6px;
+cursor:pointer;
+}
+
+.route{
+background:#ff5722;
+border:none;
+padding:10px 14px;
+color:white;
+border-radius:8px;
+cursor:pointer;
+margin-bottom:10px;
 }
 
 </style>
@@ -110,7 +149,7 @@ cursor:pointer;
 <h3 id="teamName"></h3>
 
 <button onclick="showPage('dashboard')">Dashboard</button>
-<button onclick="showPage('jobs')">Installation Jobs</button>
+<button onclick="showPage('jobs')">Today's Jobs</button>
 
 <button class="logout" onclick="logout()">Logout</button>
 
@@ -151,17 +190,24 @@ Completed<br>
 
 <div id="jobs" style="display:none">
 
-<h2>Installation Jobs</h2>
+<h2>Today's Installation Jobs</h2>
+
+<button class="route" onclick="optimizeRoute()">
+Optimize Route
+</button>
 
 <table>
 
 <tr>
 <th>Subscriber</th>
+<th>Phone</th>
 <th>Plan</th>
 <th>Agent</th>
-<th>Installer Team</th>
 <th>Date</th>
-<th>Action</th>
+<th>Call</th>
+<th>Map</th>
+<th>Navigate</th>
+<th>Status</th>
 </tr>
 
 <tbody id="jobTable"></tbody>
@@ -175,7 +221,7 @@ Completed<br>
 
 <script>
 
-/* GET TEAM */
+/* INSTALLER TEAM */
 
 let team = localStorage.getItem("installerTeam")
 
@@ -194,7 +240,7 @@ document.getElementById(p).style.display="block"
 }
 
 
-/* GET DATABASE */
+/* DATABASE */
 
 function getSubs(){
 
@@ -222,7 +268,62 @@ render()
 }
 
 
-/* RENDER */
+/* MAP VIEW */
+
+function viewLocation(lat,long){
+
+let url="https://www.google.com/maps?q="+lat+","+long
+
+window.open(url,"_blank")
+
+}
+
+
+/* NAVIGATION */
+
+function navigate(lat,long){
+
+let url="https://www.google.com/maps/dir/?api=1&destination="+lat+","+long
+
+window.open(url,"_blank")
+
+}
+
+
+/* ROUTE OPTIMIZATION */
+
+function optimizeRoute(){
+
+let subs=getSubs()
+
+let coords=[]
+
+subs.forEach(s=>{
+
+if(s.installer===team && s.lat && s.long){
+
+coords.push(s.lat+","+s.long)
+
+}
+
+})
+
+if(coords.length===0){
+
+alert("No jobs to route")
+
+return
+
+}
+
+let url="https://www.google.com/maps/dir/"+coords.join("/")
+
+window.open(url,"_blank")
+
+}
+
+
+/* RENDER JOBS */
 
 function render(){
 
@@ -250,16 +351,55 @@ table.innerHTML+=`
 <tr>
 
 <td>${s.name}</td>
+
+<td>${s.phone || "-"}</td>
+
 <td>${s.plan}</td>
+
 <td>${s.agent}</td>
-<td>${s.installer}</td>
+
 <td>${s.installationDate || "-"}</td>
 
 <td>
 
+<a href="tel:${s.phone}">
+<button class="call">Call</button>
+</a>
+
+</td>
+
+<td>
+
+<button class="map"
+onclick="viewLocation('${s.lat}','${s.long}')">
+
+Map
+
+</button>
+
+</td>
+
+<td>
+
+<button class="nav"
+onclick="navigate('${s.lat}','${s.long}')">
+
+Navigate
+
+</button>
+
+</td>
+
+<td>
+
 ${s.status==5
-?"Completed"
-:`<button class="install" onclick="markInstalled(${i})">Mark Installed</button>`
+?"Installed"
+:`<button class="install"
+onclick="markInstalled(${i})">
+
+Mark Installed
+
+</button>`
 }
 
 </td>
