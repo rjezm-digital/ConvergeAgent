@@ -91,7 +91,8 @@ font-size:18px;
 background:white;
 padding:20px;
 border-radius:10px;
-margin-bottom:20px;
+margin-bottom:30px;
+width:420px;
 }
 
 /* TABLE */
@@ -114,21 +115,17 @@ border-bottom:1px solid #eee;
 text-align:center;
 }
 
-/* MAP */
-
-#map{
-height:450px;
-border-radius:10px;
-}
-
 .search{
 padding:10px;
 width:300px;
 margin-bottom:10px;
 }
 
-input,select{
-padding:8px;
+/* MAP */
+
+#map{
+height:450px;
+border-radius:10px;
 }
 
 </style>
@@ -151,7 +148,6 @@ padding:8px;
 
 </div>
 
-
 <div class="main">
 
 <!-- MONITORING -->
@@ -162,44 +158,20 @@ padding:8px;
 
 <div class="cards">
 
-<div class="card purple">
-Applications<br>
-<span id="apps">0</span>
-</div>
-
-<div class="card orange">
-Pending<br>
-<span id="pending">0</span>
-</div>
-
-<div class="card green">
-Installed<br>
-<span id="installed">0</span>
-</div>
-
-<div class="card red">
-Commission Released<br>
-₱<span id="total">0</span>
-</div>
-
-<div class="card cyan">
-Weekly Commission<br>
-₱<span id="weekly">0</span>
-</div>
-
-<div class="card brown">
-Monthly Commission<br>
-₱<span id="monthly">0</span>
-</div>
+<div class="card purple">Applications<br><span id="apps">0</span></div>
+<div class="card orange">Pending<br><span id="pending">0</span></div>
+<div class="card green">Installed<br><span id="installed">0</span></div>
+<div class="card red">Commission Released<br>₱<span id="total">0</span></div>
+<div class="card cyan">Weekly Commission<br>₱<span id="weekly">0</span></div>
+<div class="card brown">Monthly Commission<br>₱<span id="monthly">0</span></div>
 
 </div>
 
 <div class="chartbox">
-<canvas id="adminChart"></canvas>
+<canvas id="adminChart" width="350" height="350"></canvas>
 </div>
 
 </div>
-
 
 <!-- LEADERBOARD -->
 
@@ -223,12 +195,11 @@ Monthly Commission<br>
 
 </div>
 
-
 <!-- SUBSCRIBERS -->
 
 <div id="subs" style="display:none">
 
-<h2>All Subscribers</h2>
+<h2>Subscribers</h2>
 
 <input class="search" id="search" placeholder="Search subscriber..." onkeyup="render()">
 
@@ -248,7 +219,6 @@ Monthly Commission<br>
 </table>
 
 </div>
-
 
 <!-- INSTALLER SCHEDULING -->
 
@@ -275,7 +245,6 @@ Monthly Commission<br>
 
 </div>
 
-
 <!-- DAILY JOBS -->
 
 <div id="jobs" style="display:none">
@@ -300,7 +269,6 @@ Monthly Commission<br>
 
 </div>
 
-
 <!-- MAP -->
 
 <div id="mapSection" style="display:none">
@@ -313,18 +281,12 @@ Monthly Commission<br>
 
 </div>
 
-
 <script>
 
 let subs = JSON.parse(localStorage.getItem("subs") || "[]")
 
 const stages=[
-"Applied",
-"OMD",
-"Pending",
-"Approved",
-"For Installation",
-"Installed"
+"Applied","OMD","Pending","Approved","For Installation","Installed"
 ]
 
 let chart
@@ -361,16 +323,9 @@ leader.innerHTML=""
 
 let search=document.getElementById("search").value.toLowerCase()
 
-let apps=0
-let pending=0
-let installed=0
-
-let total=0
-let weekly=0
-let monthly=0
+let apps=0,pending=0,installed=0,total=0,weekly=0,monthly=0
 
 let agents={}
-
 let today=new Date()
 
 subs.forEach((s)=>{
@@ -412,12 +367,12 @@ table.innerHTML+=`
 
 })
 
-document.getElementById("apps").innerText=apps
-document.getElementById("pending").innerText=pending
-document.getElementById("installed").innerText=installed
-document.getElementById("total").innerText=total
-document.getElementById("weekly").innerText=weekly
-document.getElementById("monthly").innerText=monthly
+apps.innerText=apps
+pending.innerText=pending
+installed.innerText=installed
+total.innerText=total
+weekly.innerText=weekly
+monthly.innerText=monthly
 
 for(let a in agents){
 
@@ -435,7 +390,7 @@ drawChart(apps,pending,installed)
 
 }
 
-function drawChart(apps,pending,installed){
+function drawChart(a,p,i){
 
 if(chart) chart.destroy()
 
@@ -446,7 +401,7 @@ type:"doughnut",
 data:{
 labels:["Applications","Pending","Installed"],
 datasets:[{
-data:[apps,pending,installed],
+data:[a,p,i],
 backgroundColor:["#6a11cb","#ff9800","#4caf50"]
 }]
 }
@@ -515,7 +470,6 @@ alert("Schedule saved")
 function renderJobs(){
 
 let table=document.getElementById("jobTable")
-
 table.innerHTML=""
 
 let today=new Date().toISOString().split("T")[0]

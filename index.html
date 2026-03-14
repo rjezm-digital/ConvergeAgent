@@ -19,18 +19,15 @@ align-items:center;
 .login{
 background:white;
 padding:40px;
-border-radius:12px;
+border-radius:10px;
 width:320px;
-box-shadow:0 10px 40px rgba(0,0,0,0.2);
-text-align:center;
+box-shadow:0 10px 30px rgba(0,0,0,.2);
 }
 
 input{
 width:100%;
 padding:12px;
 margin:10px 0;
-border-radius:6px;
-border:1px solid #ddd;
 }
 
 button{
@@ -39,12 +36,10 @@ padding:12px;
 background:#4a6cf7;
 border:none;
 color:white;
-border-radius:6px;
 cursor:pointer;
 }
 
 </style>
-
 </head>
 
 <body>
@@ -62,11 +57,10 @@ cursor:pointer;
 
 <script>
 
-let users={
-agent1:"1234",
-agent2:"1234",
-agent3:"1234",
-admin:"admin123"
+const users={
+agent1:{pass:"1234",role:"agent"},
+agent2:{pass:"1234",role:"agent"},
+admin:{pass:"admin123",role:"admin"}
 }
 
 function login(){
@@ -74,17 +68,25 @@ function login(){
 let u=document.getElementById("user").value
 let p=document.getElementById("pass").value
 
-if(users[u] && users[u]===p){
+if(users[u] && users[u].pass===p){
 
-if(u==="admin"){
-window.location="admin.html"
-}else{
+if(users[u].role==="agent"){
+
 localStorage.setItem("agent",u)
 window.location="agent.html"
+
+}
+
+if(users[u].role==="admin"){
+
+window.location="admin.html"
+
 }
 
 }else{
+
 alert("Invalid login")
+
 }
 
 }

@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html>
+<head>
+
+<title>Installer Panel</title>
+
+<style>
+
+body{
+margin:0;
+font-family:Arial;
+display:flex;
+background:#eef1f7;
+}
+
+.sidebar{
+width:220px;
+background:#25324a;
+color:white;
+padding:20px;
+height:100vh;
+}
+
+.sidebar button{
+width:100%;
+margin:8px 0;
+padding:10px;
+background:#3c4c6e;
+border:none;
+color:white;
+border-radius:6px;
+}
+
+.main{
+flex:1;
+padding:30px;
+}
+
+.card{
+background:white;
+padding:20px;
+border-radius:10px;
+margin-bottom:15px;
+}
+
+.complete{
+background:#4caf50;
+color:white;
+padding:8px 12px;
+border:none;
+border-radius:6px;
+cursor:pointer;
+}
+
+</style>
+
+</head>
+
+<body>
+
+<div class="sidebar">
+
+<h2>Installer Panel</h2>
+
+<button onclick="showPage('jobs')">Today's Jobs</button>
+<button onclick="logout()">Logout</button>
+
+</div>
+
+<div class="main">
+
+<h2>Today's Installation Jobs</h2>
+
+<div id="jobsList"></div>
+
+</div>
+
+<script>
+
+let installer = localStorage.getItem("installer")
+
+let subs = JSON.parse(localStorage.getItem("subs") || "[]")
+
+function renderJobs(){
+
+let list = document.getElementById("jobsList")
+
+list.innerHTML=""
+
+let today = new Date().toISOString().split("T")[0]
+
+subs.forEach((s,i)=>{
+
+if(s.installer==installer && s.installationDate==today){
+
+list.innerHTML += `
+
+<div class="card">
+
+<b>${s.name}</b><br>
+
+Address: ${s.address}<br>
+Plan: ${s.plan}<br>
+Agent: ${s.agent}<br>
+
+<button class="complete" onclick="completeInstall(${i})">
+
+Mark Installed
+
+</button>
+
+</div>
+
+`
+
+}
+
+})
+
+}
+
+function completeInstall(i){
+
+subs[i].status = 5
+
+localStorage.setItem("subs",JSON.stringify(subs))
+
+alert("Installation completed")
+
+renderJobs()
+
+}
+
+function logout(){
+
+localStorage.removeItem("installer")
+
+window.location="index.html"
+
+}
+
+renderJobs()
+
+</script>
+
+</body>
+</html>

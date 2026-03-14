@@ -23,19 +23,14 @@ padding:20px;
 height:100vh;
 }
 
-.sidebar h2{
-margin-bottom:30px;
-}
-
 .sidebar button{
 width:100%;
 margin:8px 0;
 padding:12px;
 border:none;
-border-radius:8px;
 background:#3c4c6e;
 color:white;
-cursor:pointer;
+border-radius:6px;
 }
 
 .main{
@@ -54,7 +49,6 @@ margin-bottom:30px;
 padding:20px;
 border-radius:10px;
 color:white;
-font-size:18px;
 }
 
 .purple{background:#6a11cb}
@@ -66,39 +60,24 @@ font-size:18px;
 
 input,select{
 width:100%;
-padding:12px;
+padding:10px;
 margin:8px 0;
-border-radius:6px;
-border:1px solid #ccc;
 }
 
 table{
 width:100%;
 background:white;
 border-collapse:collapse;
-margin-top:20px;
 }
 
 th{
-background:#f2f2f2;
+background:#eee;
 }
 
 th,td{
 padding:10px;
-border-bottom:1px solid #eee;
+border-bottom:1px solid #ddd;
 text-align:center;
-}
-
-.action{
-cursor:pointer;
-font-size:18px;
-}
-
-.chartbox{
-background:white;
-padding:20px;
-border-radius:10px;
-margin-top:20px;
 }
 
 </style>
@@ -112,13 +91,12 @@ margin-top:20px;
 
 <button onclick="showPage('monitor')">Monitoring</button>
 <button onclick="showPage('subs')">Subscribers</button>
+
 <button onclick="logout()" style="background:#ff5e62;">Logout</button>
 
 </div>
 
 <div class="main">
-
-<!-- MONITORING -->
 
 <div id="monitor">
 
@@ -126,46 +104,18 @@ margin-top:20px;
 
 <div class="cards">
 
-<div class="card purple">
-Applications<br>
-<span id="apps">0</span>
-</div>
-
-<div class="card orange">
-Pending<br>
-<span id="pending">0</span>
-</div>
-
-<div class="card green">
-Installed<br>
-<span id="installed">0</span>
-</div>
-
-<div class="card red">
-Total Earnings<br>
-₱<span id="total">0</span>
-</div>
-
-<div class="card cyan">
-Weekly Earnings<br>
-₱<span id="weekly">0</span>
-</div>
-
-<div class="card brown">
-Monthly Earnings<br>
-₱<span id="monthly">0</span>
-</div>
+<div class="card purple">Applications<br><span id="apps">0</span></div>
+<div class="card orange">Pending<br><span id="pending">0</span></div>
+<div class="card green">Installed<br><span id="installed">0</span></div>
+<div class="card red">Total Earnings<br>₱<span id="total">0</span></div>
+<div class="card cyan">Weekly<br>₱<span id="weekly">0</span></div>
+<div class="card brown">Monthly<br>₱<span id="monthly">0</span></div>
 
 </div>
 
-<div class="chartbox">
-<canvas id="salesChart"></canvas>
-</div>
+<canvas id="salesChart" width="400"></canvas>
 
 </div>
-
-
-<!-- SUBSCRIBERS PAGE -->
 
 <div id="subs" style="display:none">
 
@@ -178,36 +128,30 @@ Monthly Earnings<br>
 
 <select id="plan">
 
-<!-- SUPER FIBER -->
 <option value="1349">Super FiberX Play 1349</option>
 <option value="1599">Super FiberX Max 1599</option>
 <option value="2599">Super FiberX Ultra 2599</option>
 
-<!-- FIBERX -->
 <option value="1500">FiberX 1500</option>
 <option value="2000">FiberX 2000</option>
 <option value="2500">FiberX 2500</option>
 <option value="3500">FiberX 3500</option>
 <option value="7000">FiberX 7000</option>
 
-<!-- BUNDLES -->
 <option value="1700">FiberX 1500 + Vision</option>
 <option value="2200">FiberX 2000 + Vision</option>
 <option value="2700">FiberX 2500 + Vision</option>
 
-<!-- TOD -->
 <option value="1699">TOD 1699</option>
 <option value="1999">TOD 1999</option>
 <option value="3000">TOD 3000</option>
 <option value="3500">TOD 3500</option>
 
-<!-- FLEXIBIZ -->
 <option value="1500">FlexiBiz 1500</option>
 <option value="2000">FlexiBiz 2000</option>
 <option value="3000">FlexiBiz 3000</option>
 <option value="5000">FlexiBiz 5000</option>
 
-<!-- MICROBIZ -->
 <option value="1449">MicroBiz MAX 1449</option>
 <option value="1549">MicroBiz MAX 1549</option>
 <option value="1749">MicroBiz MAX 1749</option>
@@ -220,7 +164,6 @@ Monthly Earnings<br>
 
 <table>
 
-<thead>
 <tr>
 <th>Agent</th>
 <th>Name</th>
@@ -230,7 +173,6 @@ Monthly Earnings<br>
 <th>→</th>
 <th>X</th>
 </tr>
-</thead>
 
 <tbody id="table"></tbody>
 
@@ -242,25 +184,20 @@ Monthly Earnings<br>
 
 <script>
 
-let agent = localStorage.getItem("agent") || "agent1"
+let agent=localStorage.getItem("agent")
 
-let subs = JSON.parse(localStorage.getItem("subs") || "[]")
+let subs=JSON.parse(localStorage.getItem("subs")||"[]")
 
 const stages=[
-"Applied",
-"OMD",
-"Pending",
-"Approved",
-"For Installation",
-"Installed"
+"Applied","OMD","Pending","Approved","For Installation","Installed"
 ]
 
 let chart
 
 function showPage(p){
 
-document.getElementById("monitor").style.display="none"
-document.getElementById("subs").style.display="none"
+monitor.style.display="none"
+subs.style.display="none"
 
 document.getElementById(p).style.display="block"
 
@@ -274,11 +211,11 @@ function addSubscriber(){
 
 subs.push({
 agent:agent,
-name:document.getElementById("name").value,
-address:document.getElementById("address").value,
-phone:document.getElementById("phone").value,
-code:document.getElementById("code").value,
-plan:parseInt(document.getElementById("plan").value),
+name:name.value,
+address:address.value,
+phone:phone.value,
+code:code.value,
+plan:parseInt(plan.value),
 status:0,
 date:new Date()
 })
@@ -289,7 +226,7 @@ render()
 }
 
 function next(i){
-if(subs[i].status<5) subs[i].status++
+if(subs[i].status<4) subs[i].status++
 save()
 render()
 }
@@ -308,18 +245,11 @@ render()
 
 function render(){
 
-let table=document.getElementById("table")
-
-table.innerHTML=""
-
-let apps=0
-let pending=0
-let installed=0
-let total=0
-let weekly=0
-let monthly=0
+let apps=0,pending=0,installed=0,total=0,weekly=0,monthly=0
 
 let today=new Date()
+
+table.innerHTML=""
 
 subs.forEach((s,i)=>{
 
@@ -345,36 +275,31 @@ if(diff<=30) monthly+=com
 }
 
 table.innerHTML+=`
-
 <tr>
-
 <td>${s.agent}</td>
 <td>${s.name}</td>
 <td>${s.plan}</td>
 <td>${stages[s.status]}</td>
-
-<td class="action" onclick="prev(${i})">←</td>
-<td class="action" onclick="next(${i})">→</td>
-<td class="action" onclick="removeSub(${i})">X</td>
-
+<td onclick="prev(${i})">←</td>
+<td onclick="next(${i})">→</td>
+<td onclick="removeSub(${i})">X</td>
 </tr>
-
 `
 
 })
 
-document.getElementById("apps").innerText=apps
-document.getElementById("pending").innerText=pending
-document.getElementById("installed").innerText=installed
-document.getElementById("total").innerText=total
-document.getElementById("weekly").innerText=weekly
-document.getElementById("monthly").innerText=monthly
+apps.innerText=apps
+pending.innerText=pending
+installed.innerText=installed
+total.innerText=total
+weekly.innerText=weekly
+monthly.innerText=monthly
 
 drawChart(apps,pending,installed)
 
 }
 
-function drawChart(apps,pending,installed){
+function drawChart(a,p,i){
 
 if(chart) chart.destroy()
 
@@ -385,8 +310,7 @@ type:"bar",
 data:{
 labels:["Applications","Pending","Installed"],
 datasets:[{
-label:"Sales Data",
-data:[apps,pending,installed]
+data:[a,p,i]
 }]
 }
 
@@ -394,15 +318,12 @@ data:[apps,pending,installed]
 
 }
 
-render()
-
 function logout(){
-
 localStorage.removeItem("agent")
-
 window.location="index.html"
-
 }
+
+render()
 
 </script>
 
