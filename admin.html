@@ -189,7 +189,6 @@ Monthly Commission<br>
 
 </div>
 
-
 <div id="agents" style="display:none">
 
 <h2>Agent Performance</h2>
@@ -199,7 +198,6 @@ Monthly Commission<br>
 </div>
 
 </div>
-
 
 <div id="subs" style="display:none">
 
@@ -222,7 +220,6 @@ Monthly Commission<br>
 </table>
 
 </div>
-
 
 <div id="schedule" style="display:none">
 
@@ -247,7 +244,6 @@ Monthly Commission<br>
 
 </div>
 
-
 <div id="jobs" style="display:none">
 
 <h2>Installer Daily Jobs</h2>
@@ -270,7 +266,6 @@ Monthly Commission<br>
 </table>
 
 </div>
-
 
 <div id="mapview" style="display:none">
 
@@ -347,6 +342,7 @@ updateMap()
 
 }
 
+/* UPDATED FUNCTION */
 function saveInstaller(code){
 
 let subs=getSubs()
@@ -358,8 +354,11 @@ subs[i].installerLocked=true
 
 saveSubs(subs)
 
+render()   /* ADDED */
+
 }
 
+/* UPDATED FUNCTION */
 function changeTeam(code){
 
 let subs=getSubs()
@@ -368,6 +367,8 @@ let i=findSub(code)
 subs[i].installerLocked=false
 
 saveSubs(subs)
+
+render()   /* ADDED */
 
 }
 
