@@ -9,10 +9,13 @@
 <link rel="stylesheet"
 href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
 
-<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-
 <link rel="stylesheet"
 href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.css"/>
+
+<link rel="stylesheet"
+href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.Default.css"/>
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
 <script src="https://unpkg.com/leaflet.markercluster@1.5.3/dist/leaflet.markercluster.js"></script>
 
@@ -72,9 +75,9 @@ color:white;
 font-size:18px;
 }
 
-.c1{background:#7b1fa2}
-.c2{background:#ff9800}
-.c3{background:#4caf50}
+.c1{background:#6a1b9a}
+.c2{background:#fb8c00}
+.c3{background:#43a047}
 .c4{background:#ff5252}
 .c5{background:#00acc1}
 .c6{background:#795548}
@@ -83,7 +86,15 @@ font-size:18px;
 background:white;
 padding:20px;
 border-radius:10px;
-margin-bottom:20px;
+margin-bottom:25px;
+height:320px;
+display:flex;
+align-items:center;
+justify-content:center;
+}
+
+.chart-box canvas{
+max-height:260px;
 }
 
 table{
@@ -187,7 +198,6 @@ Monthly Commission<br>
 
 </div>
 
-
 <!-- SUBSCRIBERS -->
 
 <div id="subs" style="display:none">
@@ -198,6 +208,8 @@ Monthly Commission<br>
 
 <tr>
 <th>Name</th>
+<th>Phone</th>
+<th>Address</th>
 <th>Plan</th>
 <th>Status</th>
 <th>Agent</th>
@@ -209,7 +221,6 @@ Monthly Commission<br>
 
 </div>
 
-
 <!-- INSTALLER SCHEDULING -->
 
 <div id="schedule" style="display:none">
@@ -220,6 +231,8 @@ Monthly Commission<br>
 
 <tr>
 <th>Name</th>
+<th>Phone</th>
+<th>Address</th>
 <th>Plan</th>
 <th>Agent</th>
 <th>Installer</th>
@@ -232,8 +245,7 @@ Monthly Commission<br>
 
 </div>
 
-
-<!-- INSTALLER JOBS -->
+<!-- INSTALLER DAILY JOBS -->
 
 <div id="jobs" style="display:none">
 
@@ -243,6 +255,8 @@ Monthly Commission<br>
 
 <tr>
 <th>Name</th>
+<th>Phone</th>
+<th>Address</th>
 <th>Plan</th>
 <th>Agent</th>
 <th>Installer</th>
@@ -254,7 +268,6 @@ Monthly Commission<br>
 </table>
 
 </div>
-
 
 <!-- GLOBAL MAP -->
 
@@ -277,11 +290,8 @@ let cluster
 
 function showPage(p){
 
-document.getElementById("monitor").style.display="none"
-document.getElementById("subs").style.display="none"
-document.getElementById("schedule").style.display="none"
-document.getElementById("jobs").style.display="none"
-document.getElementById("mapview").style.display="none"
+["monitor","subs","schedule","jobs","mapview"]
+.forEach(id=>document.getElementById(id).style.display="none")
 
 document.getElementById(p).style.display="block"
 
@@ -344,33 +354,52 @@ agents[s.agent]++
 }
 
 table+=`
+
 <tr>
+
 <td>${s.name}</td>
+<td>${s.phone || "-"}</td>
+<td>${s.address || "-"}</td>
 <td>${s.plan}</td>
 <td>${statusLabel(s.status)}</td>
 <td>${s.agent}</td>
+
 </tr>
+
 `
 
 if(s.status==4){
 
 schedule+=`
+
 <tr>
+
 <td>${s.name}</td>
+<td>${s.phone || "-"}</td>
+<td>${s.address || "-"}</td>
 <td>${s.plan}</td>
 <td>${s.agent}</td>
+
 <td>
+
 <select onchange="setInstaller(${i},this.value)">
-<option>Team A</option>
-<option>Team B</option>
-<option>Team C</option>
+<option ${s.installer=="Team A"?"selected":""}>Team A</option>
+<option ${s.installer=="Team B"?"selected":""}>Team B</option>
+<option ${s.installer=="Team C"?"selected":""}>Team C</option>
 </select>
+
 </td>
+
 <td>
+
 <input type="date"
+value="${s.installationDate || ""}"
 onchange="setDate(${i},this.value)">
+
 </td>
+
 </tr>
+
 `
 
 }
@@ -378,13 +407,19 @@ onchange="setDate(${i},this.value)">
 if(s.installationDate){
 
 jobs+=`
+
 <tr>
+
 <td>${s.name}</td>
+<td>${s.phone || "-"}</td>
+<td>${s.address || "-"}</td>
 <td>${s.plan}</td>
 <td>${s.agent}</td>
 <td>${s.installer || "-"}</td>
 <td>${s.installationDate}</td>
+
 </tr>
+
 `
 
 }
@@ -411,16 +446,34 @@ function updateCharts(a,p,i,agents){
 if(statusChart) statusChart.destroy()
 
 statusChart=new Chart(
+
 document.getElementById("statusChart"),
+
 {
 type:"doughnut",
+
 data:{
 labels:["Applications","Pending","Installed"],
+
 datasets:[{
+
 data:[a,p,i],
-backgroundColor:["#7b1fa2","#ff9800","#4caf50"]
+
+backgroundColor:[
+"#6a1b9a",
+"#fb8c00",
+"#43a047"
+],
+
+borderWidth:0
+
 }]
+},
+
+options:{
+plugins:{legend:{position:"bottom"}}
 }
+
 })
 
 if(agentChart) agentChart.destroy()
@@ -429,16 +482,27 @@ let labels=Object.keys(agents)
 let values=Object.values(agents)
 
 agentChart=new Chart(
+
 document.getElementById("agentChart"),
+
 {
 type:"bar",
+
 data:{
 labels:labels,
+
 datasets:[{
+
 data:values,
 backgroundColor:"#00acc1"
+
 }]
+},
+
+options:{
+plugins:{legend:{display:false}}
 }
+
 })
 
 }
@@ -454,6 +518,10 @@ L.tileLayer(
 ).addTo(map)
 
 cluster=L.markerClusterGroup()
+
+cluster.on("clusterclick",function(a){
+a.layer.spiderfy()
+})
 
 map.addLayer(cluster)
 
@@ -473,15 +541,28 @@ subs.forEach(s=>{
 
 if(s.lat && s.long){
 
-let marker=L.marker([s.lat,s.long])
+let icon=L.icon({
+
+iconUrl:"https://cdn-icons-png.flaticon.com/512/684/684908.png",
+iconSize:[32,32],
+iconAnchor:[16,32]
+
+})
+
+let marker=L.marker(
+[s.lat,s.long],
+{icon:icon}
+)
 
 marker.bindPopup(
 
 "<b>"+s.name+"</b><br>"+
 
-"Plan: "+s.plan+"<br>"+
+"📞 "+(s.phone || "-")+"<br>"+
 
-"Phone: "+s.phone+"<br>"+
+"📍 "+(s.address || "-")+"<br>"+
+
+"Plan: "+s.plan+"<br>"+
 
 "Agent: "+s.agent+"<br>"+
 
@@ -518,7 +599,6 @@ localStorage.setItem("subs",JSON.stringify(subs))
 function logout(){
 
 localStorage.removeItem("admin")
-
 window.location="index.html"
 
 }
