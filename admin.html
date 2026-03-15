@@ -6,14 +6,9 @@
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
-<link rel="stylesheet"
-href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
 
-<link rel="stylesheet"
-href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.css"/>
-
-<link rel="stylesheet"
-href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.Default.css"/>
+<link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.css"/>
 
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
@@ -86,15 +81,11 @@ font-size:18px;
 background:white;
 padding:20px;
 border-radius:10px;
-margin-bottom:25px;
-height:320px;
+margin-bottom:20px;
+height:300px;
 display:flex;
 align-items:center;
 justify-content:center;
-}
-
-.chart-box canvas{
-max-height:260px;
 }
 
 table{
@@ -137,6 +128,7 @@ border-radius:10px;
 <h2>Admin Panel</h2>
 
 <button onclick="showPage('monitor')">Monitoring</button>
+<button onclick="showPage('agents')">Agent Performance</button>
 <button onclick="showPage('subs')">Subscribers</button>
 <button onclick="showPage('schedule')">Installer Scheduling</button>
 <button onclick="showPage('jobs')">Installer Daily Jobs</button>
@@ -145,6 +137,7 @@ border-radius:10px;
 <button class="logout" onclick="logout()">Logout</button>
 
 </div>
+
 
 <div class="main">
 
@@ -192,6 +185,14 @@ Monthly Commission<br>
 <canvas id="statusChart"></canvas>
 </div>
 
+</div>
+
+<!-- AGENT PERFORMANCE -->
+
+<div id="agents" style="display:none">
+
+<h2>Agent Performance</h2>
+
 <div class="chart-box">
 <canvas id="agentChart"></canvas>
 </div>
@@ -213,6 +214,7 @@ Monthly Commission<br>
 <th>Plan</th>
 <th>Status</th>
 <th>Agent</th>
+<th>Update</th>
 </tr>
 
 <tbody id="subTable"></tbody>
@@ -261,6 +263,7 @@ Monthly Commission<br>
 <th>Agent</th>
 <th>Installer</th>
 <th>Date</th>
+<th>Action</th>
 </tr>
 
 <tbody id="jobsTable"></tbody>
@@ -290,7 +293,7 @@ let cluster
 
 function showPage(p){
 
-["monitor","subs","schedule","jobs","mapview"]
+["monitor","agents","subs","schedule","jobs","mapview"]
 .forEach(id=>document.getElementById(id).style.display="none")
 
 document.getElementById(p).style.display="block"
@@ -302,21 +305,32 @@ if(p==="mapview") setTimeout(loadMap,300)
 function getSubs(){
 
 let data=localStorage.getItem("subs")
-
 if(!data) return []
-
 return JSON.parse(data)
 
 }
 
-function statusLabel(s){
+function setStatus(i,val){
 
-if(s==0) return '<span class="status" style="background:#777">Encoded</span>'
-if(s==1) return '<span class="status" style="background:#3f51b5">OMD</span>'
-if(s==2) return '<span class="status" style="background:#ff9800">Pending</span>'
-if(s==3) return '<span class="status" style="background:#00acc1">Approved</span>'
-if(s==4) return '<span class="status" style="background:#ffc107">For Installation</span>'
-if(s==5) return '<span class="status" style="background:#4caf50">Installed</span>'
+let subs=getSubs()
+
+if(subs[i].status==5) return
+
+subs[i].status=parseInt(val)
+
+localStorage.setItem("subs",JSON.stringify(subs))
+
+}
+
+function confirmInstall(i){
+
+let subs=getSubs()
+
+subs[i].status=5
+
+subs[i].installedDate=new Date().toISOString()
+
+localStorage.setItem("subs",JSON.stringify(subs))
 
 }
 
@@ -327,13 +341,17 @@ let subs=getSubs()
 let apps=0
 let pend=0
 let inst=0
-let commission=0
+
+let totalCommission=0
+let weekly=0
+let monthly=0
 
 let agents={}
 
-let table=""
-let schedule=""
-let jobs=""
+let now=new Date()
+
+let weekAgo=new Date()
+weekAgo.setDate(now.getDate()-7)
 
 subs.forEach((s,i)=>{
 
@@ -346,23 +364,77 @@ if(s.status==5){
 inst++
 
 let c=(s.plan/2)-50
-commission+=c
+
+totalCommission+=c
+
+let installDate=new Date(s.installedDate)
+
+if(installDate>=weekAgo) weekly+=c
+
+if(
+installDate.getMonth()==now.getMonth() &&
+installDate.getFullYear()==now.getFullYear()
+){
+monthly+=c
+}
 
 if(!agents[s.agent]) agents[s.agent]=0
 agents[s.agent]++
 
 }
 
+})
+
+document.getElementById("applications").innerText=apps
+document.getElementById("pending").innerText=pend
+document.getElementById("installed").innerText=inst
+document.getElementById("commission").innerText=totalCommission
+document.getElementById("weekly").innerText=weekly
+document.getElementById("monthly").innerText=monthly
+
+updateCharts(apps,pend,inst,agents)
+
+renderTables()
+
+}
+
+function renderTables(){
+
+let subs=getSubs()
+
+let table=""
+let schedule=""
+let jobs=""
+
+subs.forEach((s,i)=>{
+
 table+=`
 
 <tr>
 
 <td>${s.name}</td>
-<td>${s.phone || "-"}</td>
-<td>${s.address || "-"}</td>
+<td>${s.phone}</td>
+<td>${s.address}</td>
 <td>${s.plan}</td>
-<td>${statusLabel(s.status)}</td>
+
+<td>
+
+<select onchange="setStatus(${i},this.value)" ${s.status==5?"disabled":""}>
+
+<option value="0" ${s.status==0?"selected":""}>Encoded</option>
+<option value="1" ${s.status==1?"selected":""}>OMD</option>
+<option value="2" ${s.status==2?"selected":""}>Pending</option>
+<option value="3" ${s.status==3?"selected":""}>Approved</option>
+<option value="4" ${s.status==4?"selected":""}>For Installation</option>
+<option value="5" ${s.status==5?"selected":""}>Installed</option>
+
+</select>
+
+</td>
+
 <td>${s.agent}</td>
+
+<td>-</td>
 
 </tr>
 
@@ -375,17 +447,19 @@ schedule+=`
 <tr>
 
 <td>${s.name}</td>
-<td>${s.phone || "-"}</td>
-<td>${s.address || "-"}</td>
+<td>${s.phone}</td>
+<td>${s.address}</td>
 <td>${s.plan}</td>
 <td>${s.agent}</td>
 
 <td>
 
 <select onchange="setInstaller(${i},this.value)">
-<option ${s.installer=="Team A"?"selected":""}>Team A</option>
-<option ${s.installer=="Team B"?"selected":""}>Team B</option>
-<option ${s.installer=="Team C"?"selected":""}>Team C</option>
+
+<option>Team A</option>
+<option>Team B</option>
+<option>Team C</option>
+
 </select>
 
 </td>
@@ -411,12 +485,19 @@ jobs+=`
 <tr>
 
 <td>${s.name}</td>
-<td>${s.phone || "-"}</td>
-<td>${s.address || "-"}</td>
+<td>${s.phone}</td>
+<td>${s.address}</td>
 <td>${s.plan}</td>
 <td>${s.agent}</td>
-<td>${s.installer || "-"}</td>
+<td>${s.installer}</td>
 <td>${s.installationDate}</td>
+
+<td>
+
+${s.status==5?"Completed":
+`<button onclick="confirmInstall(${i})">Confirm Installed</button>`}
+
+</td>
 
 </tr>
 
@@ -430,15 +511,6 @@ document.getElementById("subTable").innerHTML=table
 document.getElementById("scheduleTable").innerHTML=schedule
 document.getElementById("jobsTable").innerHTML=jobs
 
-document.getElementById("applications").innerText=apps
-document.getElementById("pending").innerText=pend
-document.getElementById("installed").innerText=inst
-document.getElementById("commission").innerText=commission
-document.getElementById("weekly").innerText=commission
-document.getElementById("monthly").innerText=commission
-
-updateCharts(apps,pend,inst,agents)
-
 }
 
 function updateCharts(a,p,i,agents){
@@ -446,63 +518,33 @@ function updateCharts(a,p,i,agents){
 if(statusChart) statusChart.destroy()
 
 statusChart=new Chart(
-
 document.getElementById("statusChart"),
-
 {
 type:"doughnut",
-
 data:{
 labels:["Applications","Pending","Installed"],
-
 datasets:[{
-
 data:[a,p,i],
-
-backgroundColor:[
-"#6a1b9a",
-"#fb8c00",
-"#43a047"
-],
-
-borderWidth:0
-
+backgroundColor:["#6a1b9a","#fb8c00","#43a047"]
 }]
 },
-
-options:{
-plugins:{legend:{position:"bottom"}}
-}
-
+options:{plugins:{legend:{position:"bottom"}}}
 })
 
 if(agentChart) agentChart.destroy()
 
-let labels=Object.keys(agents)
-let values=Object.values(agents)
-
 agentChart=new Chart(
-
 document.getElementById("agentChart"),
-
 {
 type:"bar",
-
 data:{
-labels:labels,
-
+labels:Object.keys(agents),
 datasets:[{
-
-data:values,
+data:Object.values(agents),
 backgroundColor:"#00acc1"
-
 }]
 },
-
-options:{
-plugins:{legend:{display:false}}
-}
-
+options:{plugins:{legend:{display:false}}}
 })
 
 }
@@ -519,10 +561,6 @@ L.tileLayer(
 
 cluster=L.markerClusterGroup()
 
-cluster.on("clusterclick",function(a){
-a.layer.spiderfy()
-})
-
 map.addLayer(cluster)
 
 updateMap()
@@ -535,32 +573,24 @@ if(!cluster) return
 
 cluster.clearLayers()
 
-let subs=getSubs()
-
-subs.forEach(s=>{
+getSubs().forEach(s=>{
 
 if(s.lat && s.long){
 
 let icon=L.icon({
-
 iconUrl:"https://cdn-icons-png.flaticon.com/512/684/684908.png",
-iconSize:[32,32],
-iconAnchor:[16,32]
-
+iconSize:[30,30]
 })
 
-let marker=L.marker(
-[s.lat,s.long],
-{icon:icon}
-)
+let marker=L.marker([s.lat,s.long],{icon:icon})
 
 marker.bindPopup(
 
 "<b>"+s.name+"</b><br>"+
 
-"📞 "+(s.phone || "-")+"<br>"+
+"📞 "+s.phone+"<br>"+
 
-"📍 "+(s.address || "-")+"<br>"+
+"📍 "+s.address+"<br>"+
 
 "Plan: "+s.plan+"<br>"+
 
