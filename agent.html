@@ -15,6 +15,8 @@ display:flex;
 background:#eef1f7;
 }
 
+/* SIDEBAR */
+
 .sidebar{
 width:240px;
 background:#25324a;
@@ -41,6 +43,8 @@ background:#4e6cff;
 .logout{
 background:#ff5e62!important;
 }
+
+/* MAIN */
 
 .main{
 flex:1;
@@ -70,10 +74,22 @@ font-size:18px;
 .c5{background:#00acc1}
 .c6{background:#795548}
 
+/* FORM GRID */
+
+.form-grid{
+display:grid;
+grid-template-columns:1fr 1fr;
+gap:12px;
+margin-bottom:10px;
+}
+
+.full{
+grid-column:1/span 2;
+}
+
 input,select{
 width:100%;
 padding:10px;
-margin:6px 0;
 border-radius:6px;
 border:1px solid #ddd;
 }
@@ -113,7 +129,9 @@ border-radius:6px;
 color:white;
 }
 
-.encoded{background:#777}
+.encoded{
+background:#777;
+}
 
 </style>
 
@@ -186,48 +204,60 @@ Monthly Earnings<br>
 
 <h2>Add Subscriber</h2>
 
-<input id="name" placeholder="Subscriber Name">
+<div class="form-grid">
 
-<input id="address" placeholder="Address">
+<input id="name" placeholder="Subscriber Name">
 
 <input id="phone" placeholder="Phone Number">
 
+<input id="address" class="full" placeholder="Address">
+
 <input id="appcode" placeholder="Application Code">
-
-<input id="lat" placeholder="Latitude">
-
-<input id="long" placeholder="Longitude">
 
 <select id="plan">
 
+<!-- FiberX -->
 <option value="1500">FiberX 1500</option>
 <option value="2000">FiberX 2000</option>
 <option value="2500">FiberX 2500</option>
 <option value="3500">FiberX 3500</option>
 
+<!-- FiberX Play -->
 <option value="1349">FiberX Play 1349</option>
 <option value="1599">FiberX Play 1599</option>
 <option value="1999">FiberX Play 1999</option>
+<option value="2499">FiberX Play 2499</option>
 
+<!-- Bundles -->
 <option value="2899">FiberX Bundle 2899</option>
 <option value="3799">FiberX Bundle 3799</option>
 
+<!-- MicroBiz -->
 <option value="3000">MicroBiz 3000</option>
 <option value="4000">MicroBiz 4000</option>
 
-<option value="5000">FlexiBiz 5000</option>
-<option value="7000">FlexiBiz 7000</option>
+<!-- FlexiBIZ -->
+<option value="5000">FlexiBIZ 5000</option>
+<option value="7000">FlexiBIZ 7000</option>
+<option value="9000">FlexiBIZ 9000</option>
 
-<option value="10000">Biz 10000</option>
+<!-- BIZ -->
+<option value="10000">BIZ 10000</option>
+<option value="15000">BIZ 15000</option>
 
+<!-- Time Of Day -->
 <option value="999">TOD 999</option>
 <option value="1299">TOD 1299</option>
 
 </select>
 
-<button class="add" onclick="addSubscriber()">
-Add Subscriber
-</button>
+<input id="lat" placeholder="Latitude">
+
+<input id="long" placeholder="Longitude">
+
+</div>
+
+<button class="add" onclick="addSubscriber()">Add Subscriber</button>
 
 <table>
 
@@ -250,6 +280,8 @@ Add Subscriber
 
 
 <script>
+
+let chart;
 
 /* PAGE SWITCH */
 
@@ -282,7 +314,7 @@ function addSubscriber(){
 
 let subs=getSubs()
 
-let plan=document.getElementById("plan").value
+let plan=parseInt(document.getElementById("plan").value)
 
 subs.push({
 
@@ -301,6 +333,43 @@ status:0
 localStorage.setItem("subs",JSON.stringify(subs))
 
 render()
+
+}
+
+
+/* UPDATE GRAPH */
+
+function updateChart(applications,installed){
+
+if(chart){
+chart.destroy()
+}
+
+chart=new Chart(document.getElementById("chart"),{
+
+type:"bar",
+
+data:{
+labels:["Applications","Installed"],
+datasets:[{
+
+data:[applications,installed],
+
+backgroundColor:[
+"#7b1fa2",
+"#4caf50"
+]
+
+}]
+},
+
+options:{
+plugins:{
+legend:{display:false}
+}
+}
+
+})
 
 }
 
@@ -329,7 +398,7 @@ if(s.status==5){
 
 installed++
 
-earnings+= (s.plan/2)-50
+earnings+=(s.plan/2)-50
 
 }
 
@@ -338,20 +407,11 @@ table.innerHTML+=`
 <tr>
 
 <td>${s.name}</td>
-
 <td>${s.address}</td>
-
 <td>${s.phone}</td>
-
 <td>${s.appcode}</td>
-
 <td>${s.plan}</td>
-
-<td>
-<span class="status encoded">
-Encoded
-</span>
-</td>
+<td><span class="status encoded">Encoded</span></td>
 
 </tr>
 
@@ -367,24 +427,9 @@ document.getElementById("earnings").innerText=earnings
 document.getElementById("weekly").innerText=earnings
 document.getElementById("monthly").innerText=earnings
 
+updateChart(applications,installed)
+
 }
-
-
-/* GRAPH */
-
-new Chart(document.getElementById("chart"),{
-
-type:"bar",
-
-data:{
-labels:["Applications","Installed"],
-datasets:[{
-data:[0,0],
-backgroundColor:["#7b1fa2","#4caf50"]
-}]
-}
-
-})
 
 
 /* LOGOUT */

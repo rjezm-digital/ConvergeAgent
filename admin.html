@@ -1,8 +1,20 @@
 <!DOCTYPE html>
 <html>
 <head>
+
 <title>Admin Panel</title>
+
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<link rel="stylesheet"
+href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+<link rel="stylesheet"
+href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.css"/>
+
+<script src="https://unpkg.com/leaflet.markercluster@1.5.3/dist/leaflet.markercluster.js"></script>
 
 <style>
 
@@ -43,6 +55,7 @@ background:#ff5e62!important;
 .main{
 flex:1;
 padding:30px;
+overflow:auto;
 }
 
 .cards{
@@ -59,33 +72,18 @@ color:white;
 font-size:18px;
 }
 
-.purple{background:#6a11cb}
-.orange{background:#ff9800}
-.green{background:#4caf50}
-.red{background:#ff5e62}
-.cyan{background:#00bcd4}
-.brown{background:#795548}
+.c1{background:#7b1fa2}
+.c2{background:#ff9800}
+.c3{background:#4caf50}
+.c4{background:#ff5252}
+.c5{background:#00acc1}
+.c6{background:#795548}
 
-.status{
-padding:5px 10px;
-border-radius:6px;
-color:white;
-font-size:12px;
-}
-
-.encoded{background:#9e9e9e}
-.omd{background:#2196f3}
-.pending{background:#ff9800}
-.approved{background:#9c27b0}
-.install{background:#ffc107;color:black}
-.installed{background:#4caf50}
-
-.chartbox{
+.chart-box{
 background:white;
 padding:20px;
 border-radius:10px;
-width:420px;
-margin-bottom:30px;
+margin-bottom:20px;
 }
 
 table{
@@ -106,13 +104,19 @@ border-bottom:1px solid #eee;
 text-align:center;
 }
 
-.search{
-padding:10px;
-width:300px;
-margin-bottom:10px;
+.status{
+padding:4px 10px;
+border-radius:6px;
+color:white;
+}
+
+#map{
+height:520px;
+border-radius:10px;
 }
 
 </style>
+
 </head>
 
 <body>
@@ -122,10 +126,10 @@ margin-bottom:10px;
 <h2>Admin Panel</h2>
 
 <button onclick="showPage('monitor')">Monitoring</button>
-<button onclick="showPage('leaderboard')">Agent Leaderboard</button>
 <button onclick="showPage('subs')">Subscribers</button>
 <button onclick="showPage('schedule')">Installer Scheduling</button>
 <button onclick="showPage('jobs')">Installer Daily Jobs</button>
+<button onclick="showPage('mapview')">Global Map</button>
 
 <button class="logout" onclick="logout()">Logout</button>
 
@@ -141,41 +145,48 @@ margin-bottom:10px;
 
 <div class="cards">
 
-<div class="card purple">Applications<br><span id="apps">0</span></div>
-<div class="card orange">Pending<br><span id="pending">0</span></div>
-<div class="card green">Installed<br><span id="installed">0</span></div>
+<div class="card c1">
+Applications<br>
+<span id="applications">0</span>
+</div>
 
-<div class="card red">Commission Released<br>₱<span id="total">0</span></div>
-<div class="card cyan">Weekly Commission<br>₱<span id="weekly">0</span></div>
-<div class="card brown">Monthly Commission<br>₱<span id="monthly">0</span></div>
+<div class="card c2">
+Pending<br>
+<span id="pending">0</span>
+</div>
+
+<div class="card c3">
+Installed<br>
+<span id="installed">0</span>
+</div>
+
+<div class="card c4">
+Commission To Be Released<br>
+₱<span id="commission">0</span>
+</div>
+
+<div class="card c5">
+Weekly Commission<br>
+₱<span id="weekly">0</span>
+</div>
+
+<div class="card c6">
+Monthly Commission<br>
+₱<span id="monthly">0</span>
+</div>
 
 </div>
 
-<div class="chartbox">
-<canvas id="adminChart"></canvas>
+<div class="chart-box">
+<canvas id="statusChart"></canvas>
+</div>
+
+<div class="chart-box">
+<canvas id="agentChart"></canvas>
 </div>
 
 </div>
 
-<!-- LEADERBOARD -->
-
-<div id="leaderboard" style="display:none">
-
-<h2>Agent Leaderboard</h2>
-
-<table>
-
-<tr>
-<th>Agent</th>
-<th>Installed</th>
-<th>Commission</th>
-</tr>
-
-<tbody id="leaderTable"></tbody>
-
-</table>
-
-</div>
 
 <!-- SUBSCRIBERS -->
 
@@ -183,23 +194,21 @@ margin-bottom:10px;
 
 <h2>Subscribers</h2>
 
-<input class="search" id="search" placeholder="Search subscriber..." onkeyup="render()">
-
 <table>
 
 <tr>
-<th>Agent</th>
 <th>Name</th>
 <th>Plan</th>
 <th>Status</th>
-<th>Update</th>
+<th>Agent</th>
 </tr>
 
-<tbody id="table"></tbody>
+<tbody id="subTable"></tbody>
 
 </table>
 
 </div>
+
 
 <!-- INSTALLER SCHEDULING -->
 
@@ -211,11 +220,10 @@ margin-bottom:10px;
 
 <tr>
 <th>Name</th>
-<th>Agent</th>
 <th>Plan</th>
+<th>Agent</th>
 <th>Installer</th>
 <th>Date</th>
-<th>Action</th>
 </tr>
 
 <tbody id="scheduleTable"></tbody>
@@ -223,6 +231,7 @@ margin-bottom:10px;
 </table>
 
 </div>
+
 
 <!-- INSTALLER JOBS -->
 
@@ -233,16 +242,27 @@ margin-bottom:10px;
 <table>
 
 <tr>
-<th>Date</th>
-<th>Subscriber</th>
+<th>Name</th>
 <th>Plan</th>
-<th>Installer</th>
 <th>Agent</th>
+<th>Installer</th>
+<th>Date</th>
 </tr>
 
-<tbody id="jobTable"></tbody>
+<tbody id="jobsTable"></tbody>
 
 </table>
+
+</div>
+
+
+<!-- GLOBAL MAP -->
+
+<div id="mapview" style="display:none">
+
+<h2>Global Subscriber Map</h2>
+
+<div id="map"></div>
 
 </div>
 
@@ -250,290 +270,265 @@ margin-bottom:10px;
 
 <script>
 
-const stages=["Encoded","OMD","Pending","Approved","For Installation","Installed"]
-
-const statusClass=["encoded","omd","pending","approved","install","installed"]
-
-let chart
+let statusChart
+let agentChart
+let map
+let cluster
 
 function showPage(p){
 
 document.getElementById("monitor").style.display="none"
-document.getElementById("leaderboard").style.display="none"
 document.getElementById("subs").style.display="none"
 document.getElementById("schedule").style.display="none"
 document.getElementById("jobs").style.display="none"
+document.getElementById("mapview").style.display="none"
 
 document.getElementById(p).style.display="block"
 
-if(p==="schedule") renderSchedule()
-if(p==="jobs") renderJobs()
+if(p==="mapview") setTimeout(loadMap,300)
 
 }
 
 function getSubs(){
+
 let data=localStorage.getItem("subs")
+
 if(!data) return []
+
 return JSON.parse(data)
+
 }
 
-function updateStatus(i,val){
-let subs=getSubs()
-subs[i].status=parseInt(val)
-localStorage.setItem("subs",JSON.stringify(subs))
-render()
+function statusLabel(s){
+
+if(s==0) return '<span class="status" style="background:#777">Encoded</span>'
+if(s==1) return '<span class="status" style="background:#3f51b5">OMD</span>'
+if(s==2) return '<span class="status" style="background:#ff9800">Pending</span>'
+if(s==3) return '<span class="status" style="background:#00acc1">Approved</span>'
+if(s==4) return '<span class="status" style="background:#ffc107">For Installation</span>'
+if(s==5) return '<span class="status" style="background:#4caf50">Installed</span>'
+
 }
 
 function render(){
 
 let subs=getSubs()
 
-let apps=0,pending=0,installed=0,total=0,weekly=0,monthly=0
-
-let today=new Date()
+let apps=0
+let pend=0
+let inst=0
+let commission=0
 
 let agents={}
 
-let table=document.getElementById("table")
-let leader=document.getElementById("leaderTable")
-
-if(table) table.innerHTML=""
-if(leader) leader.innerHTML=""
-
-let search=""
-let searchBox=document.getElementById("search")
-if(searchBox) search=searchBox.value.toLowerCase()
+let table=""
+let schedule=""
+let jobs=""
 
 subs.forEach((s,i)=>{
 
 apps++
 
-if(s.status==2) pending++
+if(s.status==2) pend++
 
 if(s.status==5){
 
-installed++
+inst++
 
-let com=(s.plan/2)-50
+let c=(s.plan/2)-50
+commission+=c
 
-total+=com
-
-if(!agents[s.agent]) agents[s.agent]={installs:0,earn:0}
-
-agents[s.agent].installs++
-agents[s.agent].earn+=com
-
-let diff=(today-new Date(s.date))/(1000*60*60*24)
-
-if(diff<=7) weekly+=com
-if(diff<=30) monthly+=com
+if(!agents[s.agent]) agents[s.agent]=0
+agents[s.agent]++
 
 }
 
-if(table){
-
-if(search && !s.name.toLowerCase().includes(search)) return
-
-table.innerHTML+=`
-
+table+=`
 <tr>
-
-<td>${s.agent}</td>
 <td>${s.name}</td>
 <td>${s.plan}</td>
-
-<td><span class="status ${statusClass[s.status]}">${stages[s.status]}</span></td>
-
-<td>
-
-<select onchange="updateStatus(${i},this.value)">
-
-<option value="0" ${s.status==0?"selected":""}>Encoded</option>
-<option value="1" ${s.status==1?"selected":""}>OMD</option>
-<option value="2" ${s.status==2?"selected":""}>Pending</option>
-<option value="3" ${s.status==3?"selected":""}>Approved</option>
-<option value="4" ${s.status==4?"selected":""}>For Installation</option>
-<option value="5" ${s.status==5?"selected":""}>Installed</option>
-
-</select>
-
-</td>
-
+<td>${statusLabel(s.status)}</td>
+<td>${s.agent}</td>
 </tr>
+`
 
+if(s.status==4){
+
+schedule+=`
+<tr>
+<td>${s.name}</td>
+<td>${s.plan}</td>
+<td>${s.agent}</td>
+<td>
+<select onchange="setInstaller(${i},this.value)">
+<option>Team A</option>
+<option>Team B</option>
+<option>Team C</option>
+</select>
+</td>
+<td>
+<input type="date"
+onchange="setDate(${i},this.value)">
+</td>
+</tr>
+`
+
+}
+
+if(s.installationDate){
+
+jobs+=`
+<tr>
+<td>${s.name}</td>
+<td>${s.plan}</td>
+<td>${s.agent}</td>
+<td>${s.installer || "-"}</td>
+<td>${s.installationDate}</td>
+</tr>
 `
 
 }
 
 })
 
-for(let a in agents){
+document.getElementById("subTable").innerHTML=table
+document.getElementById("scheduleTable").innerHTML=schedule
+document.getElementById("jobsTable").innerHTML=jobs
 
-leader.innerHTML+=`
+document.getElementById("applications").innerText=apps
+document.getElementById("pending").innerText=pend
+document.getElementById("installed").innerText=inst
+document.getElementById("commission").innerText=commission
+document.getElementById("weekly").innerText=commission
+document.getElementById("monthly").innerText=commission
 
-<tr>
-<td>${a}</td>
-<td>${agents[a].installs}</td>
-<td>₱${agents[a].earn}</td>
-</tr>
-
-`
-
-}
-
-document.getElementById("apps").innerText=apps
-document.getElementById("pending").innerText=pending
-document.getElementById("installed").innerText=installed
-document.getElementById("total").innerText=total
-document.getElementById("weekly").innerText=weekly
-document.getElementById("monthly").innerText=monthly
-
-drawChart(apps,pending,installed)
+updateCharts(apps,pend,inst,agents)
 
 }
 
-function drawChart(a,p,i){
+function updateCharts(a,p,i,agents){
 
-if(chart) chart.destroy()
+if(statusChart) statusChart.destroy()
 
-chart=new Chart(document.getElementById("adminChart"),{
-
+statusChart=new Chart(
+document.getElementById("statusChart"),
+{
 type:"doughnut",
-
 data:{
 labels:["Applications","Pending","Installed"],
 datasets:[{
 data:[a,p,i],
-backgroundColor:["#6a11cb","#ff9800","#4caf50"]
+backgroundColor:["#7b1fa2","#ff9800","#4caf50"]
 }]
 }
+})
 
+if(agentChart) agentChart.destroy()
+
+let labels=Object.keys(agents)
+let values=Object.values(agents)
+
+agentChart=new Chart(
+document.getElementById("agentChart"),
+{
+type:"bar",
+data:{
+labels:labels,
+datasets:[{
+data:values,
+backgroundColor:"#00acc1"
+}]
+}
 })
 
 }
 
-function renderSchedule(){
+function loadMap(){
 
-let subs=getSubs()
+if(map) return
 
-let table=document.getElementById("scheduleTable")
+map=L.map("map").setView([9.85,124.1],11)
 
-table.innerHTML=""
+L.tileLayer(
+"https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+).addTo(map)
 
-subs.forEach((s,i)=>{
+cluster=L.markerClusterGroup()
 
-if(s.status==4){
+map.addLayer(cluster)
 
-table.innerHTML+=`
-
-<tr>
-
-<td>${s.name}</td>
-<td>${s.agent}</td>
-<td>${s.plan}</td>
-
-<td>
-
-<select id="installer${i}" ${s.installer?"disabled":""}>
-
-<option ${s.installer=="Team A"?"selected":""}>Team A</option>
-<option ${s.installer=="Team B"?"selected":""}>Team B</option>
-<option ${s.installer=="Team C"?"selected":""}>Team C</option>
-
-</select>
-
-</td>
-
-<td>
-
-<input type="date" id="date${i}" value="${s.installationDate||""}" ${s.installer?"disabled":""}>
-
-</td>
-
-<td>
-
-${s.installer
-?`<button onclick="changeTeam(${i})">Change Team</button>`
-:`<button onclick="saveSchedule(${i})">Save</button>`}
-
-</td>
-
-</tr>
-
-`
+updateMap()
 
 }
 
-})
+function updateMap(){
 
-}
+if(!cluster) return
 
-function saveSchedule(i){
-
-let subs=getSubs()
-
-subs[i].installer=document.getElementById("installer"+i).value
-subs[i].installationDate=document.getElementById("date"+i).value
-
-localStorage.setItem("subs",JSON.stringify(subs))
-
-renderSchedule()
-
-}
-
-function changeTeam(i){
+cluster.clearLayers()
 
 let subs=getSubs()
-
-subs[i].installer=""
-
-localStorage.setItem("subs",JSON.stringify(subs))
-
-renderSchedule()
-
-}
-
-function renderJobs(){
-
-let subs=getSubs()
-
-let table=document.getElementById("jobTable")
-
-table.innerHTML=""
-
-let today=new Date().toISOString().split("T")[0]
 
 subs.forEach(s=>{
 
-if(s.installationDate==today){
+if(s.lat && s.long){
 
-table.innerHTML+=`
+let marker=L.marker([s.lat,s.long])
 
-<tr>
+marker.bindPopup(
 
-<td>${s.installationDate}</td>
-<td>${s.name}</td>
-<td>${s.plan}</td>
-<td>${s.installer}</td>
-<td>${s.agent}</td>
+"<b>"+s.name+"</b><br>"+
 
-</tr>
+"Plan: "+s.plan+"<br>"+
 
-`
+"Phone: "+s.phone+"<br>"+
+
+"Agent: "+s.agent+"<br>"+
+
+"<a target='_blank' href='https://maps.google.com/?q="+s.lat+","+s.long+"'>Navigate</a>"
+
+)
+
+cluster.addLayer(marker)
 
 }
 
 })
+
+}
+
+function setInstaller(i,val){
+
+let subs=getSubs()
+subs[i].installer=val
+
+localStorage.setItem("subs",JSON.stringify(subs))
+
+}
+
+function setDate(i,val){
+
+let subs=getSubs()
+subs[i].installationDate=val
+
+localStorage.setItem("subs",JSON.stringify(subs))
 
 }
 
 function logout(){
+
+localStorage.removeItem("admin")
+
 window.location="index.html"
+
 }
 
 render()
 
-setInterval(render,2000)
+setInterval(()=>{
+render()
+updateMap()
+},2000)
 
 </script>
 
