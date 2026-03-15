@@ -16,7 +16,6 @@ href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.css"/>
 href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.Default.css"/>
 
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-
 <script src="https://unpkg.com/leaflet.markercluster@1.5.3/dist/leaflet.markercluster.js"></script>
 
 <style>
@@ -111,12 +110,6 @@ border-bottom:1px solid #eee;
 text-align:center;
 }
 
-.status{
-padding:4px 10px;
-border-radius:6px;
-color:white;
-}
-
 #map{
 height:520px;
 border-radius:10px;
@@ -146,43 +139,18 @@ border-radius:10px;
 
 <div class="main">
 
-<!-- MONITORING -->
-
 <div id="monitor">
 
 <h2>Sales Monitoring</h2>
 
 <div class="cards">
 
-<div class="card c1">
-Applications<br>
-<span id="applications">0</span>
-</div>
-
-<div class="card c2">
-Pending<br>
-<span id="pending">0</span>
-</div>
-
-<div class="card c3">
-Installed<br>
-<span id="installed">0</span>
-</div>
-
-<div class="card c4">
-Commission To Be Released<br>
-₱<span id="commission">0</span>
-</div>
-
-<div class="card c5">
-Weekly Commission<br>
-₱<span id="weekly">0</span>
-</div>
-
-<div class="card c6">
-Monthly Commission<br>
-₱<span id="monthly">0</span>
-</div>
+<div class="card c1">Applications<br><span id="applications">0</span></div>
+<div class="card c2">Pending<br><span id="pending">0</span></div>
+<div class="card c3">Installed<br><span id="installed">0</span></div>
+<div class="card c4">Commission To Be Released<br>₱<span id="commission">0</span></div>
+<div class="card c5">Weekly Commission<br>₱<span id="weekly">0</span></div>
+<div class="card c6">Monthly Commission<br>₱<span id="monthly">0</span></div>
 
 </div>
 
@@ -192,8 +160,6 @@ Monthly Commission<br>
 
 </div>
 
-
-<!-- AGENT PERFORMANCE -->
 
 <div id="agents" style="display:none">
 
@@ -205,8 +171,6 @@ Monthly Commission<br>
 
 </div>
 
-
-<!-- SUBSCRIBERS -->
 
 <div id="subs" style="display:none">
 
@@ -230,8 +194,6 @@ Monthly Commission<br>
 
 </div>
 
-
-<!-- INSTALLER SCHEDULING -->
 
 <div id="schedule" style="display:none">
 
@@ -257,8 +219,6 @@ Monthly Commission<br>
 </div>
 
 
-<!-- INSTALLER JOBS -->
-
 <div id="jobs" style="display:none">
 
 <h2>Installer Daily Jobs</h2>
@@ -283,8 +243,6 @@ Monthly Commission<br>
 </div>
 
 
-<!-- GLOBAL MAP -->
-
 <div id="mapview" style="display:none">
 
 <h2>Global Subscriber Map</h2>
@@ -295,7 +253,18 @@ Monthly Commission<br>
 
 </div>
 
+
 <script>
+
+const STATUS={
+ENCODED:0,
+OMD:1,
+PENDING:2,
+APPROVED:3,
+FOR_INSTALL:4,
+INSTALL_DONE:5,
+INSTALLED:6
+}
 
 let statusChart
 let agentChart
@@ -314,18 +283,15 @@ if(p==="mapview") setTimeout(loadMap,300)
 }
 
 function getSubs(){
-
 let data=localStorage.getItem("subs")
-if(!data) return []
-return JSON.parse(data)
-
+return data?JSON.parse(data):[]
 }
 
 function setStatus(i,val){
 
 let subs=getSubs()
 
-if(subs[i].status==5) return
+if(subs[i].status>=STATUS.INSTALL_DONE) return
 
 subs[i].status=parseInt(val)
 
@@ -355,11 +321,21 @@ localStorage.setItem("subs",JSON.stringify(subs))
 
 }
 
-function confirmInstall(i){
+function installerDone(i){
 
 let subs=getSubs()
 
-subs[i].status=5
+subs[i].status=STATUS.INSTALL_DONE
+
+localStorage.setItem("subs",JSON.stringify(subs))
+
+}
+
+function adminConfirmInstall(i){
+
+let subs=getSubs()
+
+subs[i].status=STATUS.INSTALLED
 subs[i].installedDate=new Date().toISOString()
 
 localStorage.setItem("subs",JSON.stringify(subs))
@@ -387,9 +363,9 @@ subs.forEach((s,i)=>{
 
 apps++
 
-if(s.status==2) pend++
+if(s.status==STATUS.PENDING) pend++
 
-if(s.status==5){
+if(s.status==STATUS.INSTALLED){
 
 inst++
 
@@ -410,12 +386,12 @@ agents[s.agent]++
 
 })
 
-document.getElementById("applications").innerText=apps
-document.getElementById("pending").innerText=pend
-document.getElementById("installed").innerText=inst
-document.getElementById("commission").innerText=commission
-document.getElementById("weekly").innerText=weekly
-document.getElementById("monthly").innerText=monthly
+applications.innerText=apps
+pending.innerText=pend
+installed.innerText=inst
+commission.innerText=commission
+weekly.innerText=weekly
+monthly.innerText=monthly
 
 updateCharts(apps,pend,inst,agents)
 
@@ -444,14 +420,13 @@ table+=`
 
 <td>
 
-<select onchange="setStatus(${i},this.value)" ${s.status==5?"disabled":""}>
+<select onchange="setStatus(${i},this.value)" ${s.status>=STATUS.INSTALL_DONE?"disabled":""}>
 
 <option value="0" ${s.status==0?"selected":""}>Encoded</option>
 <option value="1" ${s.status==1?"selected":""}>OMD</option>
 <option value="2" ${s.status==2?"selected":""}>Pending</option>
 <option value="3" ${s.status==3?"selected":""}>Approved</option>
 <option value="4" ${s.status==4?"selected":""}>For Installation</option>
-<option value="5" ${s.status==5?"selected":""}>Installed</option>
 
 </select>
 
@@ -465,7 +440,7 @@ table+=`
 
 `
 
-if(s.status==4){
+if(s.status==STATUS.FOR_INSTALL){
 
 schedule+=`
 
@@ -480,40 +455,28 @@ schedule+=`
 <td>
 
 ${s.installerLocked ?
-
 s.installer :
-
 `<select id="installer_${i}">
 <option>Team A</option>
 <option>Team B</option>
 <option>Team C</option>
-</select>`
-
-}
+</select>`}
 
 </td>
 
 <td>
 
 ${s.installerLocked ?
-
 s.installationDate :
-
-`<input type="date" id="date_${i}">`
-
-}
+`<input type="date" id="date_${i}">`}
 
 </td>
 
 <td>
 
 ${s.installerLocked ?
-
 `<button onclick="changeTeam(${i})">Change Team</button>` :
-
-`<button onclick="saveInstaller(${i})">Save</button>`
-
-}
+`<button onclick="saveInstaller(${i})">Save</button>`}
 
 </td>
 
@@ -539,8 +502,11 @@ jobs+=`
 
 <td>
 
-${s.status==5 ? "Completed" :
-`<button onclick="confirmInstall(${i})">Confirm</button>`}
+${s.status==STATUS.INSTALL_DONE ?
+`<button onclick="adminConfirmInstall(${i})">Confirm Installed</button>` :
+s.status==STATUS.INSTALLED ?
+"Installed" :
+`<button onclick="installerDone(${i})">Mark Done</button>`}
 
 </td>
 
@@ -552,9 +518,9 @@ ${s.status==5 ? "Completed" :
 
 })
 
-document.getElementById("subTable").innerHTML=table
-document.getElementById("scheduleTable").innerHTML=schedule
-document.getElementById("jobsTable").innerHTML=jobs
+subTable.innerHTML=table
+scheduleTable.innerHTML=schedule
+jobsTable.innerHTML=jobs
 
 }
 
@@ -606,6 +572,10 @@ L.tileLayer(
 
 cluster=L.markerClusterGroup()
 
+cluster.on("clusterclick",function(a){
+a.layer.spiderfy()
+})
+
 map.addLayer(cluster)
 
 updateMap()
@@ -622,25 +592,15 @@ getSubs().forEach(s=>{
 
 if(s.lat && s.long){
 
-let icon=L.icon({
-iconUrl:"https://cdn-icons-png.flaticon.com/512/684/684908.png",
-iconSize:[30,30]
-})
-
-let marker=L.marker([s.lat,s.long],{icon:icon})
+let marker=L.marker([s.lat,s.long])
 
 marker.bindPopup(
 
 "<b>"+s.name+"</b><br>"+
-
 "📞 "+s.phone+"<br>"+
-
 "📍 "+s.address+"<br>"+
-
 "Plan: "+s.plan+"<br>"+
-
 "Agent: "+s.agent+"<br>"+
-
 "<a target='_blank' href='https://maps.google.com/?q="+s.lat+","+s.long+"'>Navigate</a>"
 
 )
@@ -654,18 +614,20 @@ cluster.addLayer(marker)
 }
 
 function logout(){
-
 localStorage.removeItem("admin")
 window.location="index.html"
-
 }
 
 render()
 
 setInterval(()=>{
+
+if(document.getElementById("schedule").style.display!=="block"){
 render()
 updateMap()
-},2000)
+}
+
+},3000)
 
 </script>
 
