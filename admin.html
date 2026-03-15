@@ -16,6 +16,7 @@ href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.css"/>
 href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.Default.css"/>
 
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
 <script src="https://unpkg.com/leaflet.markercluster@1.5.3/dist/leaflet.markercluster.js"></script>
 
 <style>
@@ -110,6 +111,12 @@ border-bottom:1px solid #eee;
 text-align:center;
 }
 
+.status{
+padding:4px 10px;
+border-radius:6px;
+color:white;
+}
+
 #map{
 height:520px;
 border-radius:10px;
@@ -136,7 +143,6 @@ border-radius:10px;
 
 </div>
 
-
 <div class="main">
 
 <div id="monitor">
@@ -145,12 +151,35 @@ border-radius:10px;
 
 <div class="cards">
 
-<div class="card c1">Applications<br><span id="applications">0</span></div>
-<div class="card c2">Pending<br><span id="pending">0</span></div>
-<div class="card c3">Installed<br><span id="installed">0</span></div>
-<div class="card c4">Commission To Be Released<br>₱<span id="commission">0</span></div>
-<div class="card c5">Weekly Commission<br>₱<span id="weekly">0</span></div>
-<div class="card c6">Monthly Commission<br>₱<span id="monthly">0</span></div>
+<div class="card c1">
+Applications<br>
+<span id="applications">0</span>
+</div>
+
+<div class="card c2">
+Pending<br>
+<span id="pending">0</span>
+</div>
+
+<div class="card c3">
+Installed<br>
+<span id="installed">0</span>
+</div>
+
+<div class="card c4">
+Commission To Be Released<br>
+₱<span id="commission">0</span>
+</div>
+
+<div class="card c5">
+Weekly Commission<br>
+₱<span id="weekly">0</span>
+</div>
+
+<div class="card c6">
+Monthly Commission<br>
+₱<span id="monthly">0</span>
+</div>
 
 </div>
 
@@ -253,7 +282,6 @@ border-radius:10px;
 
 </div>
 
-
 <script>
 
 const STATUS={
@@ -283,62 +311,86 @@ if(p==="mapview") setTimeout(loadMap,300)
 }
 
 function getSubs(){
+
 let data=localStorage.getItem("subs")
-return data?JSON.parse(data):[]
+if(!data) return []
+return JSON.parse(data)
+
 }
 
-function setStatus(i,val){
+function saveSubs(data){
+
+localStorage.setItem("subs",JSON.stringify(data))
+
+}
+
+function findSub(code){
 
 let subs=getSubs()
+return subs.findIndex(s=>s.code===code)
 
-if(subs[i].status>=STATUS.INSTALL_DONE) return
+}
+
+function setStatus(code,val){
+
+let subs=getSubs()
+let i=findSub(code)
+
+if(i===-1) return
 
 subs[i].status=parseInt(val)
 
-localStorage.setItem("subs",JSON.stringify(subs))
+saveSubs(subs)
+
+render()
+updateMap()
 
 }
 
-function saveInstaller(i){
+function saveInstaller(code){
 
 let subs=getSubs()
+let i=findSub(code)
 
-subs[i].installer=document.getElementById("installer_"+i).value
-subs[i].installationDate=document.getElementById("date_"+i).value
+subs[i].installer=document.getElementById("installer_"+code).value
+subs[i].installationDate=document.getElementById("date_"+code).value
 subs[i].installerLocked=true
 
-localStorage.setItem("subs",JSON.stringify(subs))
+saveSubs(subs)
 
 }
 
-function changeTeam(i){
+function changeTeam(code){
 
 let subs=getSubs()
+let i=findSub(code)
 
 subs[i].installerLocked=false
 
-localStorage.setItem("subs",JSON.stringify(subs))
+saveSubs(subs)
 
 }
 
-function installerDone(i){
+function installerDone(code){
 
 let subs=getSubs()
+let i=findSub(code)
 
 subs[i].status=STATUS.INSTALL_DONE
 
-localStorage.setItem("subs",JSON.stringify(subs))
+saveSubs(subs)
 
 }
 
-function adminConfirmInstall(i){
+function confirmInstall(code){
 
 let subs=getSubs()
+let i=findSub(code)
 
 subs[i].status=STATUS.INSTALLED
 subs[i].installedDate=new Date().toISOString()
 
-localStorage.setItem("subs",JSON.stringify(subs))
+saveSubs(subs)
 
 }
 
@@ -359,7 +411,7 @@ let now=new Date()
 let weekAgo=new Date()
 weekAgo.setDate(now.getDate()-7)
 
-subs.forEach((s,i)=>{
+subs.forEach(s=>{
 
 apps++
 
@@ -407,7 +459,7 @@ let table=""
 let schedule=""
 let jobs=""
 
-subs.forEach((s,i)=>{
+subs.forEach(s=>{
 
 table+=`
 
@@ -420,7 +472,7 @@ table+=`
 
 <td>
 
-<select onchange="setStatus(${i},this.value)" ${s.status>=STATUS.INSTALL_DONE?"disabled":""}>
+<select onchange="setStatus('${s.code}',this.value)" ${s.status>=STATUS.INSTALL_DONE?"disabled":""}>
 
 <option value="0" ${s.status==0?"selected":""}>Encoded</option>
 <option value="1" ${s.status==1?"selected":""}>OMD</option>
@@ -434,7 +486,7 @@ table+=`
 
 <td>${s.agent}</td>
 
-<td>-</td>
+<td>${s.code}</td>
 
 </tr>
 
@@ -456,7 +508,7 @@ schedule+=`
 
 ${s.installerLocked ?
 s.installer :
-`<select id="installer_${i}">
+`<select id="installer_${s.code}">
 <option>Team A</option>
 <option>Team B</option>
 <option>Team C</option>
@@ -468,15 +520,15 @@ s.installer :
 
 ${s.installerLocked ?
 s.installationDate :
-`<input type="date" id="date_${i}">`}
+`<input type="date" id="date_${s.code}">`}
 
 </td>
 
 <td>
 
 ${s.installerLocked ?
-`<button onclick="changeTeam(${i})">Change Team</button>` :
-`<button onclick="saveInstaller(${i})">Save</button>`}
+`<button onclick="changeTeam('${s.code}')">Change Team</button>` :
+`<button onclick="saveInstaller('${s.code}')">Save</button>`}
 
 </td>
 
@@ -503,10 +555,10 @@ jobs+=`
 <td>
 
 ${s.status==STATUS.INSTALL_DONE ?
-`<button onclick="adminConfirmInstall(${i})">Confirm Installed</button>` :
+`<button onclick="confirmInstall('${s.code}')">Confirm Installed</button>` :
 s.status==STATUS.INSTALLED ?
 "Installed" :
-`<button onclick="installerDone(${i})">Mark Done</button>`}
+`<button onclick="installerDone('${s.code}')">Mark Done</button>`}
 
 </td>
 
@@ -572,10 +624,6 @@ L.tileLayer(
 
 cluster=L.markerClusterGroup()
 
-cluster.on("clusterclick",function(a){
-a.layer.spiderfy()
-})
-
 map.addLayer(cluster)
 
 updateMap()
@@ -614,20 +662,20 @@ cluster.addLayer(marker)
 }
 
 function logout(){
+
 localStorage.removeItem("admin")
 window.location="index.html"
+
 }
 
 render()
 
 setInterval(()=>{
-
 if(document.getElementById("schedule").style.display!=="block"){
 render()
 updateMap()
 }
-
-},3000)
+},2000)
 
 </script>
 

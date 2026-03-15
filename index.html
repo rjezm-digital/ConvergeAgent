@@ -104,21 +104,28 @@ Authorized users only
 
 <script>
 
+/* CLEAR PREVIOUS SESSION */
+
+localStorage.removeItem("agent")
+localStorage.removeItem("installerTeam")
+localStorage.removeItem("admin")
+
 function login(){
 
-let user=document.getElementById("username").value
-let pass=document.getElementById("password").value
+let user=document.getElementById("username").value.trim()
+let pass=document.getElementById("password").value.trim()
 
-/* ADMIN */
+/* ADMIN LOGIN */
 
 if(user==="admin" && pass==="admin123"){
 
+localStorage.setItem("admin","true")
 window.location="admin.html"
 return
 
 }
 
-/* INSTALLER */
+/* INSTALLER LOGIN */
 
 if(pass==="1234" && user==="teamA"){
 
@@ -144,11 +151,18 @@ return
 
 }
 
-/* AGENT */
+/* AGENT LOGIN */
 
 if(pass==="1234"){
 
 localStorage.setItem("agent",user)
+
+/* ensure subs storage exists for CRM sync */
+
+if(!localStorage.getItem("subs")){
+localStorage.setItem("subs",JSON.stringify([]))
+}
+
 window.location="agent.html"
 return
 

@@ -158,8 +158,6 @@ margin-bottom:10px;
 
 <div class="main">
 
-<!-- DASHBOARD -->
-
 <div id="dashboard">
 
 <h2>Installer Dashboard</h2>
@@ -185,8 +183,6 @@ Completed<br>
 
 </div>
 
-
-<!-- JOBS -->
 
 <div id="jobs" style="display:none">
 
@@ -253,11 +249,41 @@ return JSON.parse(data)
 }
 
 
-/* MARK INSTALLED */
+/* ADDED: find subscriber by application code */
+
+function findIndexByCode(code){
+
+let subs=getSubs()
+
+return subs.findIndex(s=>s.code===code || s.appcode===code)
+
+}
+
+
+/* ORIGINAL INSTALL FUNCTION */
 
 function markInstalled(i){
 
 let subs=getSubs()
+
+subs[i].status=5
+
+localStorage.setItem("subs",JSON.stringify(subs))
+
+render()
+
+}
+
+
+/* ADDED SAFE INSTALL FUNCTION (code based) */
+
+function markInstalledByCode(code){
+
+let subs=getSubs()
+
+let i=findIndexByCode(code)
+
+if(i===-1) return
 
 subs[i].status=5
 
@@ -395,7 +421,8 @@ Navigate
 ${s.status==5
 ?"Installed"
 :`<button class="install"
-onclick="markInstalled(${i})">
+onclick="markInstalled(${i})"
+data-code="${s.code || s.appcode}">
 
 Mark Installed
 
