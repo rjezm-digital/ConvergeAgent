@@ -183,20 +183,22 @@ Monthly Commission<br>
 
 </div>
 
+<div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;">
+
 <div class="chart-box">
 <canvas id="statusChart"></canvas>
 </div>
-
-</div>
-
-<div id="agents" style="display:none">
-
-<h2>Agent Performance</h2>
 
 <div class="chart-box">
 <canvas id="agentChart"></canvas>
 </div>
 
+</div>
+
+</div>
+
+<div id="agents" style="display:none">
+<h2>Agent Performance</h2>
 </div>
 
 <div id="subs" style="display:none">
@@ -584,7 +586,10 @@ data:[a,p,i],
 backgroundColor:["#6a1b9a","#fb8c00","#43a047"]
 }]
 },
-options:{plugins:{legend:{position:"bottom"}}}
+options:{
+plugins:{legend:{position:"bottom"}},
+cutout:"60%"
+}
 })
 
 if(agentChart) agentChart.destroy()
