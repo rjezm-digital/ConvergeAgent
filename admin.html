@@ -190,7 +190,11 @@ Monthly Commission<br>
 </div>
 
 <div class="chart-box">
+
+<div id="topAgent" style="font-size:18px;font-weight:bold;margin-bottom:10px;"></div>
+
 <canvas id="agentChart"></canvas>
+
 </div>
 
 </div>
@@ -475,6 +479,8 @@ function renderAgentTable(agents){
 
 let subs=getSubs()
 let html=""
+let topAgent=""
+let topCommission=0
 
 Object.keys(agents).forEach(agent=>{
 
@@ -493,6 +499,10 @@ if(s.status>=STATUS.INSTALL_DONE){
 installed++
 commission+=(s.plan/2)-50
 
+if(commission>topCommission){
+topCommission=commission
+topAgent=agent
+}
 }
 
 }
@@ -513,6 +523,10 @@ html+=`
 /* ADDED SAFE CHECK */
 if(document.getElementById("agentTable")){
 document.getElementById("agentTable").innerHTML=html
+}
+if(topAgent){
+document.getElementById("topAgent").innerHTML=
+"🏆 Top Agent: "+topAgent+" — ₱"+topCommission
 }
 
 }
@@ -535,7 +549,7 @@ table+=`
 <td>${s.plan}</td>
 
 <td>
-<select onchange="setStatus('${s.code}',this.value)">
+<select onchange="setStatus('${s.code}',this.value)" ${s.status>=STATUS.FOR_INSTALL?"disabled":""}>
 <option value="0" ${s.status==0?"selected":""}>Encoded</option>
 <option value="1" ${s.status==1?"selected":""}>OMD</option>
 <option value="2" ${s.status==2?"selected":""}>Pending</option>
