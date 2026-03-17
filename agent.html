@@ -4,7 +4,9 @@
 
 <title>Agent Panel</title>
 
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
 
 <style>
 
@@ -254,6 +256,24 @@ Monthly Earnings<br>
 
 <script>
 
+const firebaseConfig = {
+  apiKey: "AIzaSyBwrJprjuU4BywFapZyw_SsBcsJAYo5OPU",
+  authDomain: "convergecrm-7c237.firebaseapp.com",
+  projectId: "convergecrm-7c237",
+  storageBucket: "convergecrm-7c237.firebasestorage.app",
+  messagingSenderId: "1078658502451",
+  appId: "1:1078658502451:web:7d81a4d127d42f15eab846"
+};
+
+firebase.initializeApp(firebaseConfig);
+
+const auth = firebase.auth();
+const db = firebase.firestore();
+
+</script>
+
+<script>
+    
 let chart
 
 function showPage(p){
@@ -265,21 +285,23 @@ document.getElementById(p).style.display="block"
 
 }
 
-function getSubs(){
+async function getSubs(){
 
-let data=localStorage.getItem("subs")
+let subs=[]
 
-if(!data) return []
+const snapshot = await db.collection("subscribers").get()
 
-return JSON.parse(data)
+snapshot.forEach(doc=>{
+subs.push(doc.data())
+})
 
+return subs
+
+}
 }
 
 /* ensure storage exists */
 
-if(!localStorage.getItem("subs")){
-localStorage.setItem("subs",JSON.stringify([]))
-}
 
 function addSubscriber(){
 
@@ -287,7 +309,7 @@ let subs=getSubs()
 
 let code=document.getElementById("appcode").value
 
-subs.push({
+db.collection("subscribers").doc(code).set({
 
 name:document.getElementById("name").value,
 address:document.getElementById("address").value,
@@ -300,6 +322,7 @@ plan:parseInt(document.getElementById("plan").value),
 agent:localStorage.getItem("agent"),
 status:0
 
+})
 })
 
 localStorage.setItem("subs",JSON.stringify(subs))

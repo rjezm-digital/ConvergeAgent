@@ -4,7 +4,9 @@
 
 <title>Admin Panel</title>
 
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
 
 <link rel="stylesheet"
 href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
@@ -304,6 +306,24 @@ Monthly Commission<br>
 
 <script>
 
+const firebaseConfig = {
+  apiKey: "AIzaSyBwrJprjuU4BywFapZyw_SsBcsJAYo5OPU",
+  authDomain: "convergecrm-7c237.firebaseapp.com",
+  projectId: "convergecrm-7c237",
+  storageBucket: "convergecrm-7c237.firebasestorage.app",
+  messagingSenderId: "1078658502451",
+  appId: "1:1078658502451:web:7d81a4d127d42f15eab846"
+};
+
+firebase.initializeApp(firebaseConfig);
+
+const auth = firebase.auth();
+const db = firebase.firestore();
+
+</script>
+
+<script>
+
 const STATUS={
 ENCODED:0,
 OMD:1,
@@ -330,10 +350,19 @@ if(p==="mapview") setTimeout(loadMap,300)
 
 }
 
-function getSubs(){
-let data=localStorage.getItem("subs")
-if(!data) return []
-return JSON.parse(data)
+async function getSubs(){
+
+let subs=[]
+
+const snapshot = await db.collection("subscribers").get()
+
+snapshot.forEach(doc=>{
+subs.push(doc.data())
+})
+
+return subs
+
+}
 }
 
 function saveSubs(data){
@@ -415,9 +444,9 @@ render()
 
 }
 
-function render(){
+async function render(){
 
-let subs=getSubs()
+let subs=await getSubs()
 
 let apps=0
 let pend=0
@@ -741,7 +770,7 @@ if(document.getElementById("schedule").style.display!=="block"){
 render()
 updateMap()
 }
-},2000)
+},5000)
 
 function logout(){
 localStorage.removeItem("admin")

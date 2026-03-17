@@ -4,6 +4,10 @@
 
 <title>Installer Panel</title>
 
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+
 <style>
 
 body{
@@ -217,6 +221,24 @@ Optimize Route
 
 <script>
 
+const firebaseConfig = {
+  apiKey: "AIzaSyBwrJprjuU4BywFapZyw_SsBcsJAYo5OPU",
+  authDomain: "convergecrm-7c237.firebaseapp.com",
+  projectId: "convergecrm-7c237",
+  storageBucket: "convergecrm-7c237.firebasestorage.app",
+  messagingSenderId: "1078658502451",
+  appId: "1:1078658502451:web:7d81a4d127d42f15eab846"
+};
+
+firebase.initializeApp(firebaseConfig);
+
+const auth = firebase.auth();
+const db = firebase.firestore();
+
+</script>
+
+<script>
+
 /* INSTALLER TEAM */
 
 let team = localStorage.getItem("installerTeam")
@@ -238,13 +260,19 @@ document.getElementById(p).style.display="block"
 
 /* DATABASE */
 
-function getSubs(){
+async function getSubs(){
 
-let data=localStorage.getItem("subs")
+let subs=[]
 
-if(!data) return []
+const snapshot = await db.collection("subscribers").get()
 
-return JSON.parse(data)
+snapshot.forEach(doc=>{
+subs.push(doc.data())
+})
+
+return subs
+
+}
 
 }
 
