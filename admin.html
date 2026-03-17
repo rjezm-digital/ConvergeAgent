@@ -7,6 +7,7 @@
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
 <link rel="stylesheet"
 href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
@@ -368,14 +369,13 @@ function saveSubs(data){
 localStorage.setItem("subs",JSON.stringify(data))
 }
 
-function findSub(code){
-let subs=getSubs()
+async function findSub(code){
+let subs = await getSubs()
 return subs.findIndex(s=>s.code===code)
 }
 
-function setStatus(code,val){
-
-let subs=getSubs()
+async function setStatus(code,val){
+let subs = await getSubs()
 let i=findSub(code)
 
 if(i===-1) return
@@ -388,9 +388,8 @@ render()
 
 }
 
-function saveInstaller(code){
-
-let subs=getSubs()
+async function saveInstaller(code){
+let subs = await getSubs()
 let i=findSub(code)
 
 subs[i].installer=document.getElementById("installer_"+code).value
@@ -403,9 +402,8 @@ render()
 
 }
 
-function changeTeam(code){
-
-let subs=getSubs()
+async function changeTeam(code){
+let subs = await getSubs()
 let i=findSub(code)
 
 subs[i].installerLocked=false
@@ -416,9 +414,8 @@ render()
 
 }
 
-function installerDone(code){
-
-let subs=getSubs()
+async function installerDone(code){
+let subs = await getSubs()
 let i=findSub(code)
 
 subs[i].status=STATUS.INSTALL_DONE
@@ -429,9 +426,8 @@ render()
 
 }
 
-function confirmInstall(code){
-
-let subs=getSubs()
+async function confirmInstall(code){
+let subs = await getSubs()
 let i=findSub(code)
 
 subs[i].status=STATUS.INSTALLED
@@ -728,8 +724,6 @@ map.addLayer(cluster)
 updateMap()
 
 }
-
-function updateMap(){
 
 async function updateMap(){
 
