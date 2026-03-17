@@ -322,7 +322,7 @@ const db = firebase.firestore();
 
 </script>
 
-<script>
+<<script>
 
 const STATUS={
 ENCODED:0,
@@ -364,84 +364,56 @@ return subs
 
 }
 
-function saveSubs(data){
-localStorage.setItem("subs",JSON.stringify(data))
-}
+/* ========================= */
+/* FIREBASE ACTIONS (FIXED) */
+/* ========================= */
 
-function findSub(code){
-let subs=getSubs()
-return subs.findIndex(s=>s.code===code)
-}
+async function setStatus(code,val){
 
-function setStatus(code,val){
-
-let subs=getSubs()
-let i=findSub(code)
-
-if(i===-1) return
-
-subs[i].status=parseInt(val)
-
-saveSubs(subs)
+await db.collection("subscribers").doc(code).update({
+status:parseInt(val)
+})
 
 render()
 
 }
 
-function saveInstaller(code){
+async function saveInstaller(code){
 
-let subs=getSubs()
-let i=findSub(code)
-
-subs[i].installer=document.getElementById("installer_"+code).value
-subs[i].installationDate=document.getElementById("date_"+code).value
-subs[i].installerLocked=true
-
-saveSubs(subs)
+await db.collection("subscribers").doc(code).update({
+installer: document.getElementById("installer_"+code).value,
+installationDate: document.getElementById("date_"+code).value,
+installerLocked:true
+})
 
 render()
 
 }
 
-function changeTeam(code){
+async function changeTeam(code){
 
-let subs=getSubs()
-let i=findSub(code)
-
-subs[i].installerLocked=false
-
-saveSubs(subs)
+await db.collection("subscribers").doc(code).update({
+installerLocked:false
+})
 
 render()
 
 }
 
-function installerDone(code){
+async function confirmInstall(code){
 
-let subs=getSubs()
-let i=findSub(code)
-
-subs[i].status=STATUS.INSTALL_DONE
-
-saveSubs(subs)
+await db.collection("subscribers").doc(code).update({
+status:STATUS.INSTALLED,
+installedDate:new Date().toISOString()
+})
 
 render()
 
 }
 
-function confirmInstall(code){
-
-let subs=getSubs()
-let i=findSub(code)
-
-subs[i].status=STATUS.INSTALLED
-subs[i].installedDate=new Date().toISOString()
-
-saveSubs(subs)
-
-render()
-
-}
+/* ========================= */
+/* RENDER MAIN */
+/* ========================= */
 
 async function render(){
 
@@ -495,15 +467,17 @@ document.getElementById("weekly").innerText=weekly
 document.getElementById("monthly").innerText=monthly
 
 updateCharts(apps,pend,inst,agents)
-renderAgentTable(agents)
-renderTables()
-
-/* ADDED: ensure map always updates */
-updateMap()
+await renderAgentTable(agents)
+await renderTables()
+await updateMap()
 
 }
 
-async function renderAgentTable(agents)
+/* ========================= */
+/* AGENT TABLE */
+/* ========================= */
+
+async function renderAgentTable(agents){
 
 let subs = await getSubs()
 let html=""
@@ -531,6 +505,7 @@ if(commission>topCommission){
 topCommission=commission
 topAgent=agent
 }
+
 }
 
 }
@@ -548,10 +523,8 @@ html+=`
 
 })
 
-/* ADDED SAFE CHECK */
-if(document.getElementById("agentTable")){
 document.getElementById("agentTable").innerHTML=html
-}
+
 if(topAgent){
 document.getElementById("topAgent").innerHTML=
 "🏆 Top Agent: "+topAgent+" — ₱"+topCommission
@@ -559,9 +532,13 @@ document.getElementById("topAgent").innerHTML=
 
 }
 
-function renderTables(){
+/* ========================= */
+/* TABLES */
+/* ========================= */
 
-let subs=getSubs()
+async function renderTables(){
+
+let subs = await getSubs()
 
 let table=""
 let schedule=""
@@ -615,23 +592,15 @@ ${s.installerLocked ?
 </td>
 
 <td>
-
 ${s.installerLocked ?
-`<b>${s.installer}</b>` :
-`<select id="installer_${s.code}">
-<option ${s.installer=="Team A"?"selected":""}>Team A</option>
-<option ${s.installer=="Team B"?"selected":""}>Team B</option>
-<option ${s.installer=="Team C"?"selected":""}>Team C</option>
-</select>`}
-
+s.installationDate :
+`<input type="date" id="date_${s.code}">`}
 </td>
 
 <td>
-
 ${s.installerLocked ?
 `<button onclick="changeTeam('${s.code}')">Change Team</button>` :
 `<button onclick="saveInstaller('${s.code}')">Save</button>`}
-
 </td>
 
 </tr>
@@ -668,55 +637,9 @@ document.getElementById("jobsTable").innerHTML=jobs
 
 }
 
-function updateCharts(a,p,i,agents){
-
-if(statusChart) statusChart.destroy()
-
-statusChart=new Chart(
-document.getElementById("statusChart"),
-{
-type:"doughnut",
-data:{
-labels:["Applications","Pending","Installed"],
-datasets:[{
-data:[a,p,i],
-backgroundColor:["#6a1b9a","#fb8c00","#43a047"]
-}]
-},
-options:{
-plugins:{legend:{position:"bottom"}},
-cutout:"60%"
-}
-})
-
-if(agentChart) agentChart.destroy()
-
-/* ADDED SAFE HANDLING */
-let labels=Object.keys(agents)
-let values=Object.values(agents)
-
-if(labels.length===0){
-labels=["No Data"]
-values=[0]
-}
-
-agentChart=new Chart(
-document.getElementById("agentChart"),
-{
-type:"bar",
-data:{
-labels:labels,
-datasets:[{
-data:values,
-backgroundColor:"#00acc1"
-}]
-},
-options:{
-plugins:{legend:{display:false}}
-}
-})
-
-}
+/* ========================= */
+/* MAP */
+/* ========================= */
 
 function loadMap(){
 
@@ -724,25 +647,23 @@ if(map) return
 
 map=L.map("map").setView([9.85,124.1],11)
 
-L.tileLayer(
-"https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-).addTo(map)
+L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png").addTo(map)
 
 cluster=L.markerClusterGroup()
-
 map.addLayer(cluster)
 
 updateMap()
 
 }
 
-function updateMap(){
+async function updateMap(){
 
 if(!cluster) return
 
 cluster.clearLayers()
 
 let subs = await getSubs()
+
 subs.forEach(s=>{
 
 if(s.lat && s.long){
@@ -764,6 +685,10 @@ cluster.addLayer(marker)
 })
 
 }
+
+/* ========================= */
+/* INIT */
+/* ========================= */
 
 render()
 
