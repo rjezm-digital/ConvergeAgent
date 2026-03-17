@@ -363,7 +363,6 @@ subs.push(doc.data())
 return subs
 
 }
-}
 
 function saveSubs(data){
 localStorage.setItem("subs",JSON.stringify(data))
@@ -504,9 +503,9 @@ updateMap()
 
 }
 
-function renderAgentTable(agents){
+async function renderAgentTable(agents)
 
-let subs=getSubs()
+let subs = await getSubs()
 let html=""
 let topAgent=""
 let topCommission=0
@@ -606,12 +605,18 @@ schedule+=`
 <td>${s.agent}</td>
 
 <td>
-
+${s.installerLocked ?
+`<b>${s.installer}</b>` :
+`<select id="installer_${s.code}">
+<option ${s.installer=="Team A"?"selected":""}>Team A</option>
+<option ${s.installer=="Team B"?"selected":""}>Team B</option>
+<option ${s.installer=="Team C"?"selected":""}>Team C</option>
+</select>`}
 </td>
 
 <td>
 
-$${s.installerLocked ?
+${s.installerLocked ?
 `<b>${s.installer}</b>` :
 `<select id="installer_${s.code}">
 <option ${s.installer=="Team A"?"selected":""}>Team A</option>
@@ -737,7 +742,8 @@ if(!cluster) return
 
 cluster.clearLayers()
 
-getSubs().forEach(s=>{
+let subs = await getSubs()
+subs.forEach(s=>{
 
 if(s.lat && s.long){
 
