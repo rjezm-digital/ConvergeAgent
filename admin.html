@@ -350,7 +350,7 @@ if(p==="mapview") setTimeout(loadMap,300)
 
 }
 
-async function getSubs(){
+let subs = await getSubs(){
 
 let subs=[]
 
@@ -504,7 +504,7 @@ updateMap()
 
 }
 
-function renderAgentTable(agents){
+async function renderAgentTable(){
 
 let subs=getSubs()
 let html=""
@@ -560,7 +560,7 @@ document.getElementById("topAgent").innerHTML=
 
 }
 
-function renderTables(){
+async function renderTables(){
 
 let subs=getSubs()
 
